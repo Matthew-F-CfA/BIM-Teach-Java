@@ -1,0 +1,213 @@
+<html>
+<head>
+<title>
+BIM Teach Java - File Management
+</title>
+</head>
+<body>
+<h2>File Management</h2>
+<pre>
+The Java runtime environment provides access to some useful file management functions in the java.nio.file.Files class
+and the java.io.File class. The Files class is what we will be using in this lesson. The File class is used mostly
+for input stream and output stream situations. Also, Java provides a file dialog class for choosing files from
+the file system called javax.swing.JFileChooser.
+
+Here is an <a href="FileChooserExample.java">example</a> with JFileChooser:
+<div style="background-color:lightgrey;">import java.io.File;
+import java.awt.Frame;
+import javax.swing.JFileChooser;
+
+class FileChooserExample {
+
+  public static void main(String args[]) {
+    try {
+      if(args.length==0) {
+        System.out.println("Usage:");
+        System.out.println("  java FileChooserExample &lt;load or save&gt;");
+
+        return;
+      }
+
+      if(args[0].equals("load")) {
+        JFileChooser fDialog=new JFileChooser();
+        fDialog.setCurrentDirectory(new File("."));
+        fDialog.setDialogTitle("Load File Dialog");
+        fDialog.setMultiSelectionEnabled(false);
+        fDialog.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        int intResp=fDialog.showOpenDialog(new Frame());
+
+        if(intResp!=JFileChooser.APPROVE_OPTION)
+          System.exit(0);
+
+        File fileLoad=fDialog.getSelectedFile();
+
+        System.out.println("Absolute Path: "+fileLoad.getAbsolutePath());
+
+        System.exit(0);
+      }
+      else if(args[0].equals("save")) {
+        JFileChooser fDialog=new JFileChooser();
+        fDialog.setCurrentDirectory(new File("."));
+        fDialog.setDialogTitle("Save File Dialog");
+        fDialog.setMultiSelectionEnabled(false);
+        fDialog.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        int intResp=fDialog.showSaveDialog(new Frame());
+
+        if(intResp!=JFileChooser.APPROVE_OPTION)
+          System.exit(0);
+
+        File fileSave=fDialog.getSelectedFile();
+
+        System.out.println("Absolute Path: "+fileSave.getAbsolutePath());
+
+        System.exit(0);
+      }
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+}
+</div>
+
+In the example provided above scroll down to "setCurrentDirectory". The parameter passed in is the file directory
+that will be displayed in the dialog box when show is called. In this situation, we use "new File(".")" which
+means use the directory that "java FileChooserExample" was executed in.
+
+Scroll down a little farther until you see "show*" function. The parameter is the java.awt.Component parent
+of the JFileChooser. In this situation, we used a Frame object that we never make visible. When you use
+the JFileChooser in real applications it is wise to choose a Frame that is displayed on the computer
+screen.
+
+If the "intResp" isn't equal to JFileChooser.APPROVE_OPTION then the user chose to cancel the file selection
+and we should exit the operation of displaying the file path.
+
+The "getSelectedFile" function returns a java.io.File corresponding to the file that the user selected.
+
+
+In the next example, we will copy <a href="CopyMe.txt">CopyMe.txt</a> from the current directory to
+the directory "files" inside the current directory. So, before executing the example, download the
+"CopyMe.txt" file to your current directory and create a folder called "files" in your current
+directory.
+Here is the <a href="FileCopy.java">example</a>:
+<div style="background-color:lightgrey;">import java.io.File;
+import java.awt.Frame;
+import javax.swing.JFileChooser;
+import java.nio.file.*;
+
+class FileCopy {
+
+  public static void main(String args[]) {
+    try {
+      JFileChooser fDialog=new JFileChooser();
+      fDialog.setCurrentDirectory(new File("."));
+      fDialog.setDialogTitle("File To Copy Dialog");
+      fDialog.setMultiSelectionEnabled(false);
+      fDialog.setFileSelectionMode(JFileChooser.FILES_ONLY);
+      int intResp=fDialog.showOpenDialog(new Frame());
+
+      if(intResp!=JFileChooser.APPROVE_OPTION)
+        System.exit(0);
+
+      File fileCopy=fDialog.getSelectedFile();
+
+      if(!fileCopy.getName().equals("CopyMe.txt")) {
+        System.out.println("Selected the wrong file. Exiting...");
+
+        System.exit(0);
+      }
+
+      fDialog=new JFileChooser();
+      fDialog.setCurrentDirectory(new File("."));
+      fDialog.setDialogTitle("File To Copy Target Dialog");
+      fDialog.setMultiSelectionEnabled(false);
+      fDialog.setFileSelectionMode(JFileChooser.FILES_ONLY);
+      intResp=fDialog.showSaveDialog(new Frame());
+
+      if(intResp!=JFileChooser.APPROVE_OPTION)
+        System.exit(0);
+
+      File fileTarget=fDialog.getSelectedFile();
+
+      File fileTargetParent=fileTarget.getParentFile();
+
+      if(!fileTargetParent.getAbsolutePath().equals(new File("files").getAbsolutePath())) {
+        System.out.println("Tried to copy to the wrong directory. Exiting...");
+
+        System.exit(0);
+      }
+
+
+      Path pathCopySource=FileSystems.getDefault().getPath(fileCopy.getAbsolutePath());
+      Path pathCopyTarget=FileSystems.getDefault().getPath(fileTarget.getAbsolutePath());
+
+      Files.copy(pathCopySource, pathCopyTarget);
+
+      System.exit(0);
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+}
+</div>
+
+In the above example, scroll down to the Path declarations in the "main" function. We create the Path by using
+the "getAbsolutePath" function of java.io.File . Next we use java.nio.file.Files static function "copy" to copy
+the file at "pathCopySource" to the Path specified by "pathCopyTarget".
+
+The java.nio.file.Files class also has a function called "move" for moving or renaming a file. The "move"
+function has the same parameters as the "copy" function, so if you want to try using the "move" function
+just substitute "move" for "copy" in the above example.
+
+
+In the next example, we will check to see if a file exists and if it does then we will delete the file.
+We could use java.nio.file.Files to check if the file exists and to delete the file, but instead we
+will use java.io.File because it is easier to code. This example will delete the file we just copied
+using the FileCopy class example.
+
+Here is the <a href="FileDelete.java">example</a>:
+<div style="background-color:lightgrey;">import java.io.File;
+
+class FileDelete {
+
+  public static void main(String args[]) {
+    try {
+      String strFilePathToDelete=System.getProperty("user.dir");
+      String strFileSeparator=System.getProperty("file.separator");
+      if(!strFilePathToDelete.endsWith(strFileSeparator))
+        strFilePathToDelete+=strFileSeparator;
+
+      strFilePathToDelete+="files"+strFileSeparator+"CopyMe.txt";
+
+      File fileToDelete=new File(strFilePathToDelete);
+
+      if(!fileToDelete.exists()) {
+        System.out.println("File doesn't exist. Exiting...");
+
+        return;
+      }
+
+      fileToDelete.delete();
+
+      System.out.println("Deleted file.");
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+}
+</div>
+
+In the "main" function, we use the system properties storing the current directory and the file separator for
+our operating system. After constructing the File object we call the function "exists" to see if the file
+exists. If it doesn't exist then we print a line to standard output and exit the program. If it does exist
+then we call the "delete" function on the File object, and finish the program by printing a line stating
+that the file was deleted.
+
+In this lesson, you learned how to use javax.swing.JFileChooser to select java.io.File objects. You also
+learned how to use java.nio.file.Files to "copy" a file. Lastly, you learned how to use java.io.File
+to check if a file exists and how to delete a file.
+</pre>
+</body>
+</html>

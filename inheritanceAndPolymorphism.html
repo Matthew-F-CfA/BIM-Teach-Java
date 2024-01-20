@@ -1,0 +1,117 @@
+<html>
+<head>
+<title>
+BIM Teach Java - Inheritance and Polymorphism
+</title>
+</head>
+<body>
+<h2>Inheritance and Polymorphism</h2>
+<pre>
+Inheritance and polymorphism are implementations in Object Oriented Programming where classes can subclass
+pre-existing classes and inherit functionality or mutate functionality in the superclass from which the
+subclass is extending.
+
+Inheritance makes it possible for a subclass to access and modify fields and functions of the superclass.
+The subclass uses fields and functions the same way that the superclass uses the fields and functions. The
+compiler recognizes that when a field or function is assigned or called upon that isn't in the "this" class
+that it should check for the named field or function in the superclasses.
+
+Polymorphism is a form of inheritance with an added mutation quality to it. The subclass re-declares
+fields or functions. When a subclass polymorphs a function it is called function overriding.
+
+Here are some classes in a polymorphism example:
+<ul>
+<li><a href="MyShape.java">MyShape</a>: The superclass of our shape Objects.</li>
+<li><a href="MyCircle.java">MyCircle</a>: A subclass of MyShape.</li>
+<li><a href="MyRectangle.java">MyRectangle</a>: A subclass of MyShape.</li>
+</ul>
+
+<div style="background-color:lightgrey;">abstract class MyShape {
+
+  public static void main(String args[]) {
+    MyShape myShape=new MyCircle(1.0d);
+    System.out.println("Circle:");
+    System.out.println(myShape.getPerimeter());
+    System.out.println(myShape.getArea());
+
+    if(myShape instanceof MyCircle)
+      System.out.println("Is a circle.");
+    else if(myShape instanceof MyRectangle)
+      System.out.println("Is a rectangle.");
+
+    System.out.println("");
+
+    myShape=new MyRectangle(2.0d, 2.0d);
+    System.out.println("Rectangle:");
+    System.out.println(myShape.getPerimeter());
+    System.out.println(myShape.getArea());
+
+    if(myShape instanceof MyCircle)
+      System.out.println("Is a circle.");
+    else if(myShape instanceof MyRectangle)
+      System.out.println("Is a rectangle.");
+  }
+
+  public abstract double getPerimeter();
+  public abstract double getArea();
+}
+</div>
+
+This class must be declared abstract because it has functions in it that are declared abstract.
+Any class the extends MyShape and isn't abstract must declare concrete implementations of
+the abstract functions. In the "main" function classes are instantiated that make use of
+polymorphism. Notice how the variable being assigned to is MyShape, but the class being
+constructed is MyCircle(same is done for MyRectangle). When the "getPerimeter" and "getArea"
+functions are called from the MyShape object the Java runtime environment knows which subclass's
+version of each function should be called. Also, notice the use of the instanceof operator which
+evaluates to a true or false depending on whether the variable to the left is a class of the type
+identified on the right of the instanceof operator.
+
+<div style="background-color:lightgrey;">class MyCircle extends MyShape {
+  double dblRadius=0.0d;
+
+  MyCircle(double dblRadius) {
+    this.dblRadius=dblRadius;
+  }
+
+  public double getPerimeter() {
+    return 2.0d*Math.PI*dblRadius;
+  }
+
+  public double getArea() {
+    return Math.PI*Math.pow(dblRadius, 2.0d);
+  }
+}
+</div>
+
+The perimeter, or circumference, of a circle is 2 PI radians.
+The area of a circle is PI multiplied by radius squared.
+
+<div style="background-color:lightgrey;">class MyRectangle extends MyShape {
+  double dblLength=0.0d;
+  double dblWidth=0.0d;
+
+  MyRectangle(double dblLength, double dblWidth) {
+    this.dblLength=dblLength;
+    this.dblWidth=dblWidth;
+  }
+
+  public double getPerimeter() {
+    return 2.0d*dblLength+2.0d*dblWidth;
+  }
+
+  public double getArea() {
+    return dblLength*dblWidth;
+  }
+}
+</div>
+
+The perimeter of a rectangle is 2 multiplied by the length plus 2 multiplied by the width.
+The area of a rectangle is length multiplied by width.
+
+In this lesson, you learned how to use polymorphism to organize classes with similar properties
+for streamlining usage in coded applications. You also learned about the instanceof operator's
+use for determining whether or not a variable is of a certain data type.
+</pre>
+</body>
+</html>

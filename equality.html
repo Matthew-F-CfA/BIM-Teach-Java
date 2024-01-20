@@ -1,0 +1,257 @@
+<html>
+<head>
+<title>
+BIM Teach Java - User Defined Types and Equality
+</title>
+</head>
+<body>
+<h2>User Defined Types and Equality</h2>
+<pre>
+In Java there is an operator "==" then symbolizes a check for equality between two objects.
+However, this operator may be considered miss-leading because it actually checks to see
+if the memory pointed to by one variable is the same memory pointed to by another variable.
+So, it doesn't actually check to see if the values stored by one Object are the same as
+values stored by another Object. If you want to compare whether the values of two Objects
+are the same then you must use the function "equals".
+
+Here is an <a href="EqualityOperator.java">example</a>:
+<div style="background-color:lightgrey;">class EqualityOperator {
+
+  public static void main(String args[]) {
+    String strOne=new String("Test");
+    String strTwo=new String("Test");
+
+    if(strOne==strTwo) {
+      System.out.println("strOne equals strTwo");
+    }
+    else {
+      System.out.println("strOne doesn't equal strTwo");
+    }
+
+    if(strOne.equals(strTwo)) {
+      System.out.println("strOne equals strTwo");
+    }
+    else {
+      System.out.println("strOne doesn't equal strTwo");
+    }
+
+    strTwo=strOne;
+
+    if(strOne==strTwo) {
+      System.out.println("strOne equals strTwo");
+    }
+    else {
+      System.out.println("strOne doesn't equal strTwo");
+    }
+  }
+}
+</div>
+
+The output of the program EqualityOperator.java is:
+strOne doesn't equal strTwo
+strOne equals strTwo
+strOne equals strTwo
+
+The first evaluation shows that strOne and strTwo point to two different memory locations.
+The second evaluation shows that the values stored by strOne and strTwo are equal.
+The third evaluation shows that if strTwo is assigned the same memory location as strOne then it evaluates to equal.
+
+When dealing with Strings you will probably use the "equals" function 99% of the time instead of the "==" operator.
+
+Some commonly used Object containers make use of the "equals" and "hashCode" functions of user defined types among
+these containers are java.util.Vector and java.util.Hashtable . Vector is an indexed list of Objects where
+elements are accessed according to an index. Hashtable is a mapping of keys and values. When you add an
+Object to Hashtable you provide a key and a value at the same time.
+
+The java.util.Vector function called "contains" checks to see if a value is contained in the Vector. The
+"contains" function uses the "equals" function, so if you are using your user defined type with Vectors
+then you should implement the "equals" function for comparing the values of your Objects. Furthermore,
+if you intend on using your user defined types with java.util.Hashtable types then you must also implement
+the "hashCode" function. Fortunately, when implementing user defined types it is easy to declare a
+field inside the Object to be an identifier for the Object and make that Object be of type String
+which already has both "equals" and "hashCode" overrided. So, your user defined type can make
+a call to String's implementation.
+
+Here is an <a href="VectorContainsString.java">example</a>:
+<div style="background-color:lightgrey;">import java.util.Vector;
+import java.util.Hashtable;
+
+class VectorContainsString {
+  String strStr="";
+
+  public static void main(String args[]) {
+    VectorContainsString vcs=new VectorContainsString("Testing");
+
+    Vector vecMy=new Vector();
+    vecMy.addElement(vcs);
+
+System.out.println("before vecMy contains call");
+    if(vecMy.contains(vcs)) {
+      System.out.println("Does contain.");
+    }
+    else {
+      System.out.println("Doesn't contain.");
+    }
+System.out.println("after vecMy contains call\n");
+
+
+    Hashtable hshMy=new Hashtable();
+    hshMy.put(vcs, "Testing too");
+
+System.out.println("before hshMy containsKey call");
+    if(hshMy.containsKey(vcs)) {
+      System.out.println("Does contain.");
+    }
+    else {
+      System.out.println("Doesn't contain.");
+    }
+System.out.println("after hshMy contains call");
+  }
+
+  VectorContainsString(String strStr) {
+    this.strStr=strStr;
+  }
+
+  public boolean equals(Object objObj) {
+System.out.println("equals");
+    if(objObj instanceof VectorContainsString) {
+      VectorContainsString vcs=(VectorContainsString)objObj;
+
+      if(vcs.strStr.equals(strStr))
+        return true;
+      else
+        return false;
+    }
+
+    return false;
+  }
+
+  public int hashCode() {
+System.out.println("hashCode");
+    return strStr.hashCode();
+  }
+}
+</div>
+
+In the user defined type VectorContainsString a String identifier is declared called "strStr". That String
+is used with "public boolean equals" and "public int hashCode" to provide proper overriding equality checks.
+When you run the console application, notice when "equals" is called and when "hashCode" is called.
+
+
+Another type of container is java.util.TreeMap which is very similar to java.util.Hashtable except that
+the keys implement an interface called Comparable which has a single function which is "public int compareTo(Object)".
+One place where a TreeMap implementation can be useful is with smart keys and a two dimensional grid(x and y)
+coordinates.
+
+Here is an example with two source files they are <a href="MultiplicationTable.java">MultiplicationTable.java</a> and <a href="TwoDimensionalKey.java">TwoDimensionalKey.java</a>:
+Try using the keystrokes of holding down the ctrl key and the 'c' key to exit the console application when you are finished.
+<div style="background-color:lightgrey;">import java.util.TreeMap;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+class MultiplicationTable {
+  static TreeMap mapMultiplication=new TreeMap();
+
+  static {
+    for(int i=0;i&lt;10;i++) {
+      for(int ia=0;ia&lt;10;ia++) {
+        mapMultiplication.put(new TwoDimensionalKey(i, ia), new Integer(i*ia));
+      }
+    }
+  }
+
+  public static void main(String args[]) {
+    try {
+      BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
+
+      do {
+        System.out.println("Multiplication Table from 0-9");
+
+        System.out.println("Enter the first number");
+
+        String strFirst=br.readLine();
+        int intFirst=Integer.parseInt(strFirst);
+        if(intFirst&lt;0) {
+          System.out.println("Number is too low.\n");
+
+          continue;
+        }
+        else if(intFirst&gt;9) {
+          System.out.println("Number is too high.\n");
+
+          continue;
+        }
+
+        System.out.println("Enter the second number");
+
+        String strSecond=br.readLine();
+        int intSecond=Integer.parseInt(strSecond);
+        if(intSecond&lt;0) {
+          System.out.println("Number is too low.\n");
+
+          continue;
+        }
+        else if(intSecond&gt;9) {
+          System.out.println("Number is too high.\n");
+
+          continue;
+        }
+
+        String strOut=String.valueOf(mapMultiplication.get(new TwoDimensionalKey(intFirst, intSecond)));
+
+        System.out.println("\nThe product is "+strOut+"\n");
+
+      } while(true);
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+}
+</div>
+
+And:
+<div style="background-color:lightgrey;">class TwoDimensionalKey
+implements Comparable {
+  int intX=-1;
+  int intY=-1;
+
+  TwoDimensionalKey(int intX, int intY) {
+    this.intX=intX;
+    this.intY=intY;
+  }
+
+  public int compareTo(Object obj) {
+    TwoDimensionalKey objTDK=(TwoDimensionalKey)obj;
+
+    if(intX&lt;objTDK.intX) {
+      return -1;
+    }
+    else if(intX&gt;objTDK.intX) {
+      return 1;
+    }
+    else {
+      if(intY&lt;objTDK.intY) {
+        return -1;
+      }
+      else if(intY&gt;objTDK.intY) {
+        return 1;
+      }
+    }
+
+    return 0;
+  }
+}
+</div>
+
+The static initializer in MultiplicationTable initializes a TreeMap with all of the products of a multiplication
+table with the numbers from 0-9 . After the user inputs a first and second number, a TwoDimensionalKey is
+constructed and used by the "get" function to lookup the value for the mapping with the corresponding product.
+The "compareTo" function passes in an Object as a parameter, but I recommend only using a single user defined
+type as keys for each individual TreeMap in order to avoid using the instanceof operator in the "compareTo" function.
+
+In this lesson, you learned how to implement comparisons between user defined types using the functions
+"equals" and "hashCode" for java.lang.Object subclasses and "compareTo" for implementors of java.lang.Comparable .
+</pre>
+</body>
+</html>

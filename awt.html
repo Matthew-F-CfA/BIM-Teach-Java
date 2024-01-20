@@ -1,0 +1,540 @@
+<html>
+<head>
+<title>
+BIM Teach Java - Abstract Windows Toolkit
+</title>
+</head>
+<body>
+<h2>Abstract Windows Toolkit</h2>
+<pre>
+The Abstract Windows Toolkit libraries are identified mainly by the import statements of "import java.awt.*;" and
+"import java.awt.event.*;". Where "import java.awt.*;" refers to the components that are displayable on the screen
+and "import java.awt.event.*;" refers to the events that can be triggered by user interaction with those components.
+
+The most commonly used components are:
+<ul>
+<li>java.awt.Frame: The frame that contains all other java.awt components</li>
+<li>java.awt.Menu: A menu that can be added to a Frame's menu bar</li>
+<li>java.awt.MenuItem: A menu item that can be added to a menu</li>
+<li>java.awt.Label: A label that can display text information.</li>
+<li>java.awt.TextField: A single line field where a user can type in text to be used during event dispatching.</li>
+<li>java.awt.TextArea: A multi line field where a user can type in text to be used during event dispatching.</li>
+<li>java.awt.List: A list which displays items and allows the user to select one or more items.</li>
+<li>java.awt.Choice: Similar to a List, but only displays the selected item in the component.</li>
+<li>java.awt.Checkbox: A checkbox with a label.</li>
+<li>java.awt.CheckboxGroup: Logically groups two or more Checkbox's together, so that only one of the Checkboxs in the group can be selected at any time.</li>
+<li>java.awt.Button: A button which displays a text label and allows the user to click to generate an event.</li>
+<li>java.awt.Panel: A container for other components.</li>
+<li>java.awt.Dialog: A dialog box that can block program execution until the dialog box is exited.</li>
+</ul>
+
+The most commonly used layouts:
+<ul>
+<li>java.awt.FlowLayout: Displays components from left to right then top down similar to reading a book.</li>
+<li>java.awt.BorderLayout: Displays components according to "North", "South", "East", "West", and "Center"</li>
+<li>java.awt.GridLayout: Displays components from left to right then top down, but unlike FlowLayout the
+programmer specifies the number of components per row and per column</li>
+<li>null: Displays components according to the components "setBounds" method.</li>
+</ul>
+
+The most commonly used event listeners:
+<ul>
+<li>java.awt.event.ActionListener: Handles events such as button clicks and text field enter keyboard presses</li>
+<li>java.awt.event.ItemListener: Handles events such as clicking a list item</li>
+</ul>
+
+Here is an <a href="AWTExample.java">example</a>:
+<div style="background-color:lightgrey;">import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+
+class AWTExample extends Frame
+implements ActionListener {
+  Menu menuFile=new Menu("File");
+  MenuItem menuFileExit=new MenuItem("Exit");
+  TextField txtColor=new TextField();
+  Button btnAddColor=new Button("Add Color");
+  List lstColors=new List(5);
+  Button btnRemoveColor=new Button("Remove Color");
+  Label lblMostRecentFavoriteColor=new Label("");
+  TextArea txtMyFavoriteColors=new TextArea(4, 100);
+  Button btnChooseFavoriteColor=new Button("Choose Favorite Color");
+
+  public static void main(String args[]) {
+    AWTExample awtExample=new AWTExample("AWT Example");
+    Toolkit toolkit=Toolkit.getDefaultToolkit();
+    Dimension dimScreen=toolkit.getScreenSize();
+    awtExample.setSize(dimScreen.width, dimScreen.height-40);
+    awtExample.setVisible(true);
+  }
+
+  AWTExample(String strTitle) {
+    super(strTitle);
+
+    setIconImage(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB));
+    addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent we) {
+        System.exit(0);
+      }
+    });
+
+    Panel tempPan=new Panel();
+    tempPan.setLayout(new BorderLayout());
+    tempPan.add("West", new Label("Color: "));
+    tempPan.add("Center", txtColor);
+    tempPan.add("East", btnAddColor);
+    btnAddColor.addActionListener(this);
+
+    add("North", tempPan);
+
+    Panel tempPan2=new Panel();
+    tempPan2.setLayout(new BorderLayout());
+    tempPan2.add("North", new Label("List of Colors:"));
+    tempPan2.add("Center", lstColors);
+    tempPan2.add("South", btnRemoveColor);
+    btnRemoveColor.addActionListener(this);
+
+    add("Center", tempPan2);
+
+    Panel tempPan3=new Panel();
+    tempPan3.setLayout(new BorderLayout());
+    Panel tempPan3A=new Panel();
+    tempPan3A.setLayout(new GridLayout(2, 1));
+    Panel tempPan3A1=new Panel();
+    tempPan3A1.setLayout(new GridLayout(1, 2));
+    tempPan3A1.add(new Label("Most Recent Favorite Color: "));
+    tempPan3A1.add(lblMostRecentFavoriteColor);
+    tempPan3A.add(tempPan3A1);
+    tempPan3A.add(new Label("Past Favorite Colors:"));   
+    tempPan3.add("North", tempPan3A);
+    tempPan3.add("Center", txtMyFavoriteColors);
+    Panel tempPan3B=new Panel();
+    tempPan3B.add(btnChooseFavoriteColor);
+    btnChooseFavoriteColor.addActionListener(this);
+    tempPan3.add("South", tempPan3B);
+
+    add("South", tempPan3);
+
+    menuFile.add(menuFileExit);
+    menuFileExit.addActionListener(this);
+
+    MenuBar mBar=new MenuBar();
+    mBar.add(menuFile);
+
+    setMenuBar(mBar);
+  }
+
+  public void actionPerformed(ActionEvent ae) {
+    Object evSource=ae.getSource();
+
+    if(evSource==menuFileExit) {
+      System.exit(0);
+    }
+    else if(evSource==btnAddColor) {
+      lstColors.add(txtColor.getText());
+    }
+    else if(evSource==btnRemoveColor) {
+      int intSelectedIndex=lstColors.getSelectedIndex();
+      if(intSelectedIndex==-1)
+        return;
+
+      lstColors.remove(intSelectedIndex);
+    }
+    else if(evSource==btnChooseFavoriteColor) {
+      String strItems[]=lstColors.getItems();
+
+      ChooseFavoriteColorDialog cDialog=new ChooseFavoriteColorDialog(this, strItems);
+      cDialog.show();
+
+      if(cDialog.isCanceled())
+        return;
+
+      String strChoice=cDialog.getChoice();
+
+      lblMostRecentFavoriteColor.setText(strChoice);
+      txtMyFavoriteColors.append(strChoice+"\n");
+    }
+  }
+
+  class ChooseFavoriteColorDialog extends Dialog
+  implements ActionListener, ItemListener {
+    List lstColorChoices=new List(5);
+    Button btnCancel=new Button("Cancel");
+    boolean blnCanceled=false;
+
+    ChooseFavoriteColorDialog(Frame parent, String strItems[]) {
+      super(parent, "Choose Favorite Color Dialog", true);
+
+      for(int i=0;i&lt;strItems.length;i++) {
+        lstColorChoices.add(strItems[i]);
+      }
+
+      add("North", new Label("Color Choices:"));
+
+      add("Center", lstColorChoices);
+      lstColorChoices.addItemListener(this);
+
+      add("South", btnCancel);
+      btnCancel.addActionListener(this);
+
+      Dimension dimScreen=Toolkit.getDefaultToolkit().getScreenSize();
+      setLocation(dimScreen.width/4, dimScreen.height/4);
+      setSize(dimScreen.width/2, dimScreen.height/2);
+    }
+
+    public boolean isCanceled() {
+      return blnCanceled;
+    }
+
+    public String getChoice() {
+      return lstColorChoices.getSelectedItem();
+    }
+
+    public void itemStateChanged(ItemEvent ie) {
+      Object evSource=ie.getSource();
+
+      if(evSource==lstColorChoices) {
+        int intSelectedIndex=lstColorChoices.getSelectedIndex();
+        if(intSelectedIndex==-1)
+          return;
+
+        blnCanceled=false;
+
+        dispose();
+      }
+    }
+
+    public void actionPerformed(ActionEvent ae) {
+      Object evSource=ae.getSource();
+
+      if(evSource==btnCancel) {
+        blnCanceled=true;
+
+        dispose();
+      }
+    }
+  }
+}
+</div>
+
+The first difference in this source file is the "extends" keyword in the class declaration. When one
+class "extends" another class it is said that the first class becomes a subclass of the second class
+which is a superclass of the class extending the second class. The class must extend Frame because
+we want to use the class as a window to be displayed on the screen. Also, a second difference follows
+in the keyword of "implements". The "implements" keyword tells the compiler that the class being
+declared implements an interface. In this case, the interface java.awt.event.ActionListener is being
+implemented. When a class implements an interface, all functions declared in the interface must
+by declared and coded in the implementing class. For ActionListener a single function must be declared,
+and the signature of the function is "public void actionPerformed(ActionEvent ae)". The "actionPerformed"
+function will be called whenever an event is dispatched by the user by clicking a button or other
+action generating component. The ActionEvent parameter to "actionPerformed" will contain event specific
+information for the listener of the event. Mainly, the "getSource" function of ActionEvent is used to
+determine which button triggered the event. It is possible for a single listener to be listening for
+events from multiple event sources.
+
+Next, in the "main" function we construct a new AWTExample object that we want to display on the
+computer screen. We make use of commonly used Object in the Toolkit class. The dimension that
+is returned from the Toolkit classes "getScreenSize" function returns the pixels width and height
+of the computer screen, so we can position components on the screen depending on the width and
+height of the screen. The reason why I placed "-40" in the height of the "awtExample" frame
+is that many computer operating systems have a toolbar at the bottom of the screen that can
+block out components that are inside of the frame near the bottom of the screen. Lastly,
+the "setVisible" function of Frame is called to make the window visible.
+
+In the AWTExample constructor I made use of the "super" constructor of AWTExample's superclass.
+It is necessary to call the super constructor for most subclass's in order for the built-in
+integrity of the superclass to be maintained. The super constructor has one parameter, a String
+that defines the title of the frame that will be displayed in the title bar of the frame.
+
+Next, in the constructor the setIconImage function is called to set the icon displayed in
+the title bar. The BufferedImage is set to a black rectangle that will be displayed.
+
+The next line of code is probably the most confusing to explain, but in short it executes
+code that is placed in the "windowClosing" event when the user clicks the "x" in the upper-
+right hand corner to close a window. In this example, the only code executed is "System.exit(0);"
+which will make all windows and executing units(threads) for the current application process exit
+immediately.
+
+Next, Panels are created and set to certain layouts for positioning components on the screen.
+
+If a container sets its layout using "setLayout" to BorderLayout then whenever the "add" function
+of the container is called the first parameter passed in must be a String of one of the values
+"North", "South", "East", "West", "Center". The "Center" component takes up all the space not
+claimed by the other components.
+
+If a container sets its layout using "setLayout" to GridLayout then the number of rows and columns
+to use in the container is specified in the constructor of GridLayout. For example, new GridLayout(2, 1)
+represents a container with 2 rows and 1 column. Another example, new GridLayout(1, 2) represents
+a container with 1 row and 2 columns. Lastly, new GridLayout(2, 2) represents a container with
+2 rows and 2 columns. When components are placed into container using "add" they are placed from
+left to right then down a component and left to right again, and repeat for as many rows as the
+layout specifies(similar to reading a book).
+
+If a container doesn't set its layout using "setLayout" then it uses the default layout for that
+data type. For Frame and Dialog, the default layout is BorderLayout. For Panel, the default layout
+is FlowLayout.
+
+After doing some adding to containers you will see a line of code "btnAddColor.addActionListener(this);".
+Without this line of code, code will not execute when "btnAddColor" is clicked because no event listeners
+will have been registered for "btnAddColor". The parameter to "addActionListener" is the class instance
+that should implement the code to be executed when an event is dispatched. Note that only classes that
+implement ActionListener interface will be valid as a parameter to "addActionListener". Now that the
+action listener has registered itself, whenever the user clicks on the button "btnAddColor" the code
+in "actionPerformed" of the action listener will be executed.
+
+You will become more adept at deciphering the laying out of components in containers using layout
+managers with more practice.
+
+The menu item "Exit" is added to the menu "File" and an action listener is added to the "Exit"
+menu item then a MenuBar object is created and the "File" menu is added to it. The "setMenuBar"
+function of Frame is called to set the menu bar to the object we just created.
+
+Skip down to the "actionPerformed" function.
+
+The first line of code is "Object evSource=ae.getSource();" which gets an Object which represents
+the component that triggered the event. Next, some "if" and "else if" conditional blocks are evaluated
+to determine which button's code should be executed.
+
+The first "if" condition checks if the "menuFileExit" was clicked and if it was then the Java
+runtime environment exits the application.
+
+The second condition checks if the "btnAddColor" was clicked and if it was then the line of
+code "lstColors.add(txtColor.getText());" is executed which adds an item to the list "lstColors"
+using the text the user typed into the text field "txtColor".
+
+The third condition checks if the "btnRemoveColor" was clicked and if it was then the selected
+index is checked to make sure it is valid(if it isn't valid then its value is "-1") then if
+it wasn't returned as a result of it being invalid then the item with the selected index is
+removed from "lstColors".
+
+The fourth condition checks if the "btnChooseFavoriteColor" was clicked and if it was then all
+the items in "lstColors" are assigned to a String array and that array is passed to a class
+that subclasses java.awt.Dialog called ChooseFavoriteColorDialog. The first parameter for the
+ChooseFavoriteColorDialog is a java.awt.Frame or a subclass of java.awt.Frame that is necessary
+when making a call to the super constructor inside of ChooseFavoriteColorDialog. Next, the
+"show" function is called, and once the "show" function is called the execution blocks(or is
+haulted) until the java.awt.Dialog class instance is disposed.
+
+After the java.awt.Dialog is disposed, the execution resumes with "if(cDialog.isCanceled())"
+to check the state of the ChooseFavoriteColorDialog's "blnCanceled" boolean value. If its
+btnCancel was clicked then the "actionPerformed" function will return; without executing
+any further code. Otherwise, if the "btnCancel" wasn't clicked then the execution wasn't
+canceled and the code that executes after the "if" condition gets the String chosen from
+the java.awt.List in the ChooseFavoriteColorDialog class. The "setText" function of
+java.awt.Label is called to display text on the screen. The "append" of java.awt.TextArea
+is called to append text to the current text displayed in the TextArea.
+
+Scrolling a little farther down, you can see the class declaration for ChooseFavoriteColorDialog
+which extends java.awt.Dialog and implements both the ActionListener and ItemListener interfaces.
+The ActionListener is for the button "btnCancel" and the ItemListener is for the list "lstColorChoices".
+Once again we must write an "actionPerformed" function for the class implementing the ActionListener.
+And for this class we must also write a function called "itemStateChanged(ItemEvent ie)" which must
+be coded for implementors of ItemListener. Whenever either of these events occur, the last line of
+code in the event handling functions is the "dispose" function which makes the dialog dissapear from
+the screen and returns execution back to the function that originally called the "show" function
+of the java.awt.Dialog class.
+
+All constructors of java.awt.Dialog require that a java.awt.Frame parent be passed into the
+constructor to instantiate a new java.awt.Dialog. Therefore, whenever you write your own
+java.awt.Dialog subclass make sure that one of the parameters to the constructor is a
+java.awt.Frame subclass.
+
+Another new statement that we haven't discussed yet appears in the code "for(int i=0;i&lt;strItems.length;i++)".
+This instruction starts a loop(somewhat similar to a while loop) which declares and initializes a variable
+"i" for use within the loop block of code. The loop continues to repeat itself for as long as the boolean
+expression represented by "i&lt;strItems.length" evaluates to true. At the end of each of the loops cycles,
+the variable "i" is incremented(increased) by the value 1 and the loop repeats. So, on the first cycle
+i=0, on the second cycle i=1, on the third cycle i=2, etc. This continues until i=strItems.length which
+is the number of elements that are in the array. If we didn't do the check of i&lt;strItems.length then
+eventually we would generate an ArrayIndexOutOfBoundsException which happens when trying to access
+an element of the array that doesn't exist.
+
+Our second example will implement TextField, TextArea, Choice, Checkbox, and CheckboxGroup.
+
+Here is the <a href="AWTSurvey.java">example</a>:
+<div style="background-color:lightgrey;">import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+
+class AWTSurvey extends Frame
+implements ActionListener {
+  TextField txtName=new TextField();
+  CheckboxGroup cbgGender=new CheckboxGroup();
+  Checkbox cbGenderMale=new Checkbox("Male", cbgGender, true);
+  Checkbox cbGenderFemale=new Checkbox("Female", cbgGender, false);
+  Choice chcMonth=new Choice();
+  Checkbox cbLikeEnglish=new Checkbox("I like English", false);
+  Checkbox cbLikeMath=new Checkbox("I like Math", false);
+  Checkbox cbLikeScience=new Checkbox("I like Science", false);
+  Button btnShowSurvey=new Button("Show Survey");
+  TextArea txtArea=new TextArea();
+
+  public static void main(String args[]) {
+    try {
+      AWTSurvey aFrame=new AWTSurvey();
+      Dimension dimScreen=Toolkit.getDefaultToolkit().getScreenSize();
+      aFrame.setSize(dimScreen.width, dimScreen.height-40);
+      aFrame.setVisible(true);
+    }
+    catch(Exception ex) {
+    }
+  }
+
+  AWTSurvey() {
+    super("AWT Survey");
+
+    setIconImage(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB));
+    addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent we) {
+        System.exit(0);
+      }
+    });
+
+    chcMonth.add("January");
+    chcMonth.add("February");
+    chcMonth.add("March");
+    chcMonth.add("April");
+    chcMonth.add("May");
+    chcMonth.add("June");
+    chcMonth.add("July");
+    chcMonth.add("August");
+    chcMonth.add("September");
+    chcMonth.add("October");
+    chcMonth.add("November");
+    chcMonth.add("December");
+
+    Panel tempPan=new Panel();
+    tempPan.setLayout(new GridLayout(6, 1));
+    Panel tempPanA=new Panel();
+    tempPanA.setLayout(new BorderLayout());
+    tempPanA.add("West", new Label("Name: "));
+    tempPanA.add("Center", txtName);
+    tempPan.add(tempPanA);
+    Panel tempPanB=new Panel();
+    tempPanB.setLayout(new GridLayout(1, 3));
+    tempPanB.add(new Label("Gender:"));
+    tempPanB.add(cbGenderMale);
+    tempPanB.add(cbGenderFemale);
+    tempPan.add(tempPanB);
+    Panel tempPanC=new Panel();
+    tempPanC.setLayout(new BorderLayout());
+    tempPanC.add("West", new Label("Favorite Month:"));
+    tempPanC.add("Center", chcMonth);
+    tempPan.add(tempPanC);
+    Panel tempPanD=new Panel();
+    tempPanD.setLayout(new GridLayout(1, 3));
+    tempPanD.add(cbLikeEnglish);
+    tempPanD.add(cbLikeMath);
+    tempPanD.add(cbLikeScience);
+    tempPan.add(tempPanD);
+    Panel tempPanE=new Panel();
+    tempPanE.add(btnShowSurvey);
+    btnShowSurvey.addActionListener(this);
+    tempPan.add(tempPanE);
+    tempPan.add(new Label("Survey Output:"));
+
+    add("North", tempPan);
+
+    add("Center", txtArea);
+  }
+
+  public void actionPerformed(ActionEvent ae) {
+    Object evSource=ae.getSource();
+
+    if(evSource==btnShowSurvey) {
+      String strName=txtName.getText();
+
+      boolean blnGenderMale=true;
+      Checkbox cbSelected=cbgGender.getSelectedCheckbox();
+      if(cbSelected==cbGenderFemale)
+        blnGenderMale=false;
+
+      String strMonth=chcMonth.getSelectedItem();
+
+      boolean blnLikeEnglish=cbLikeEnglish.getState();
+      boolean blnLikeMath=cbLikeMath.getState();
+      boolean blnLikeScience=cbLikeScience.getState();
+
+      StringBuffer strBuffer=new StringBuffer();
+
+      strBuffer.append("Name: ");
+      strBuffer.append(strName);
+      strBuffer.append("\n");
+
+      strBuffer.append("Gender: ");
+      if(blnGenderMale) {
+        strBuffer.append("Male");
+      }
+      else {
+        strBuffer.append("Female");
+      }
+      strBuffer.append("\n");
+
+      strBuffer.append("Favorite Month: ");
+      strBuffer.append(strMonth);
+      strBuffer.append("\n");
+
+      if(blnLikeEnglish) {
+        strBuffer.append("Likes English");
+      }
+      else {
+        strBuffer.append("Doesn't like English");
+      }
+      strBuffer.append("\n");
+      
+      if(blnLikeMath) {
+        strBuffer.append("Likes Math");
+      }
+      else {
+        strBuffer.append("Doesn't like Math");
+      }
+      strBuffer.append("\n");
+
+      if(blnLikeScience) {
+        strBuffer.append("Likes Science");
+      }
+      else {
+        strBuffer.append("Doesn't like Science");
+      }
+      strBuffer.append("\n");
+
+      txtArea.setText(strBuffer.toString());
+    }
+  }
+}
+</div>
+
+Scroll down to the declaration of "cbGenderMale", the constructor has three parameters. The first parameter
+is the label to display with the Checkbox. The second parameter is the CheckboxGroup to group this Checkbox with.
+The third parameter is the initial state of the Checkbox(whether it is currently checked).
+
+Next, you should notice the declaration of a Choice box called "cbMonth". Notice that it initially it doesn't
+contain any items. We need to add the items at some point before we expect the user to make a selection. In
+this example, we will add items in the constructor of our AWTSurvey Frame.
+
+Three Checkboxs are declared next and their labels are set in the constructor. Notice that only two parameters
+are used in these Checkboxs' constructors because they aren't grouped together with a CheckboxGroup. The
+second parameter is whether or not the Checkbox is initially checked or not.
+
+Scroll down to "chcMonth.add("January"))", this is where we place selectable items in the Choice box.
+
+Next, scroll down to "actionPerformed". First, we obtain the name of the person from "txtName" then
+we declare a boolean(true or false) with the value set to true. We then obtain the selected Checkbox
+by using CheckboxGroup's function "getSelectedCheckbox". If the "cbSelected" is the female gender
+Checkbox then we set "blnGenderMale" to false.
+
+After that, we declare a String "strMonth" to store the selected item of the Choice box "chcMonth".
+
+For our last input gathering we handle the individual Checkboxs for liking subjects. Each one
+stores a boolean value that is obtained using "getState". If the Checkbox has a check mark in it
+then the "getState" function returns true otherwise it returns false.
+
+Lastly, we create a StringBuffer called "strBuffer" for building a String that we will use to set
+the text of "txtArea" by using the TextArea's "setText" function.
+
+In this lesson you learned about some of the most common awt Object types. There are many more that can
+be found using javadocs that can be downloaded from Oracle's web site. The more you practice with
+the awt libraries the more proficient you will become.
+</pre>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<html>
+<head>
+<title>
+BIM Teach Java - Packages, Libraries, and Javadoc
+</title>
+</head>
+<body>
+<h2>Packages, Libraries, and Javadoc</h2>
+<pre>
+A package is a collection of Java class files all contained within a single file system directory.
+Packages are organizational units for Java. They also help prevent class naming conflicts.
+
+Here is an <a href="bim/data/StringContainer.java">example</a> with a package:
+<div style="background-color:lightgrey;">package bim.data;
+
+class StringContainer {
+  String strStr;
+
+  public static void main(String args[]) {
+    StringContainer strContainer=new StringContainer("Testing");
+
+    System.out.println(strContainer.getString());
+  }
+
+  StringContainer() {
+  }
+
+  StringContainer(String strStr) {
+    this.strStr=strStr;
+  }
+
+  public String getString() {
+    return strStr;
+  }
+
+  public void setString(String strStr) {
+    this.strStr=strStr;
+  }
+}
+</div>
+
+After downloading the forementioned example, copy the file to a directory that has its filepath ending with "bim\data\".
+For example, put it in a folder with the filepath "c:\testing\bim\data". Next, navigate to the directory "c:\testing"
+in your command line console then compile the source file by typing in "javac bim/data/*.java". Execute the class file
+by typing in "java bim.data.StringContainer". Notice how the javac command expects "/" as a separator for packages,
+and the java command expects "." as a separator for packages.
+
+The first line of code in the StringContainer.java source file is "package bim.data;". In that line of code
+"bim.data" defines the folder path that contains the source file that will be compiled and used. The folder
+path that is chosen is a relative path, so you could have chosen "c:\testing\bim\data" or you could have
+chosen "c:\myjava\practice\bim\data" or any path as long as it ends with "bim\data". The javac and java commands
+require you to be in the folder containing "bim\data" in order for them to execute properly.
+
+Now that you know what a package is we can take a look at importing a class from a particular package into
+our source files. Here is an <a href="StringTokenizerTest.java">example</a>:
+<div style="background-color:lightgrey;">import java.util.StringTokenizer;
+
+class StringTokenizerTest {
+
+  public static void main(String args[]) {
+    StringTokenizer strTokenizer=new StringTokenizer(args[0], ":", false);
+
+    while(strTokenizer.hasMoreTokens()) {
+      System.out.println(strTokenizer.nextToken());
+    }
+  }
+}
+</div>
+
+The first line of code imports a compiled class file called StringTokenizer into the source file. That
+StringTokenizer class is contained within a package called "java.util". While writing code you will make
+use of many compiled classes that were written by other programmers. The packages that start with "java"
+and "javax" were written by the maintainers of the Java core libraries. Some of those packages are
+"java.lang", "java.util", "java.awt", "java.io", "java.net", "javax.swing", and many others. The "java.lang"
+package is one that we have already used in previous lessons. "java.lang" is imported into all source
+files by default. One of the classes in "java.lang" is String, so if you choose you could have identified
+the data type of the String variables we have used thus far as java.lang.String .
+
+Packages can contain many class files, and Java has made it easy to import all the class files in a
+particular package by using the character "*". If we wanted to import all the class files in the "java.util"
+package then we would write "import java.util.*;". There is one drawback to using the brute force method
+of "*", and that is encountered with naming conflicts. For example, there is a class java.awt.List and
+there is a class java.util.List . Therefore, which List is used if "java.awt.List" and "java.util.List"
+are both imported? The compiler will not allow you to compile a source file which contains such a naming
+conflict with class names. How do you work around such a drawback? By using the fully qualified class name
+of the class when declaring fields like this: "java.util.List myList=new java.util.Vector();"(there isn't
+anything stopping you from importing "java.util.Vector" if you so choose, and then using "new Vector()").
+I often use "import java.awt.*" and then use single import statements for the classes contained in "java.util"
+like this "import java.util.Vector;" and "import java.util.Hashtable;".
+
+When using classes from multiple different packages in the same project you must declare the classes intended
+to be used in different packages with an access modifier of "public". For example:
+<div style="background-color:lightgrey;">public class BankClient {
+  public static double MAX_BALANCE=200000.0d;
+
+  private String strName;
+  private String strSocialSecurityNumber;
+  private double dblBankBalance=0.0d;
+
+  public static void main(String args[]) {
+    if(args.length==0) {
+      System.out.println("Usage:");
+      System.out.println("  java BankClient <client name> <client social security number> <bank balance>");
+
+      return;
+    }
+
+    String strName=args[0];
+    String strSocialSecurityNumber=args[1];
+    double dblBankBalance=Double.valueOf(args[2]).doubleValue();
+
+    BankClient udtBankClient=new BankClient(strName, strSocialSecurityNumber, dblBankBalance);
+
+    System.out.println(udtBankClient.getName());
+    System.out.println(udtBankClient.getSocialSecurityNumber());
+    System.out.println(udtBankClient.getBankBalance());
+  }
+
+  public BankClient(String strName, String strSocialSecurityNumber, double dblBankBalance) {
+    this.strName=strName;
+    this.strSocialSecurityNumber=strSocialSecurityNumber;
+    this.dblBankBalance=dblBankBalance;
+  }
+
+  public String getName() {
+    return strName;
+  }
+
+  public void setName(String strName) {
+    this.strName=strName;
+  }
+
+  public String getSocialSecurityNumber() {
+    return strSocialSecurityNumber;
+  }
+
+  public void setSocialSecurityNumber(String strSocialSecurityNumber) {
+    this.strSocialSecurityNumber=strSocialSecurityNumber;
+  }
+
+  public double getBankBalance() {
+    return dblBankBalance;
+  }
+
+  public void setBankBalance(double dblBankBalance) {
+    this.dblBankBalance=dblBankBalance;
+  }
+}
+</div>
+
+This example is taken from a previous lesson and adapted to fit this situation by including "public"
+access modifier before "class", "static", and "BankClient". Now the class is usable from other packages
+and the static field MAX_BALANCE is usable from other packages and the constructor is public, so
+instances of BankClient can be created using the "new" keyword from different packages.
+
+What about classes that are contained in other libraries that are distributed with the core Java libraries?
+These libraries can be installed into your Java Development Kit by copying the Jar file containing
+these classes to the folder <installed jdk path>/jre/lib/ext . So, copy the .jar file into the "ext" folder
+and the classes within that Jar file will be visible for importing into your source files. A word of
+caution, make sure the distributors of the Jar file are reputable and trustworthy because once their
+libraries are installed in your jdk they will be usable by other installed libraries, and that means
+that potentially malicious code can be executed on your computer.
+
+One last thing before ending this lesson, the jdk is distributed with a utility called javadoc.
+javadoc allows developers to document the uses of their libraries by including definitions for
+general description of the class, constructors, fields, and functions. You should download the
+javadocs for the core Java libraries from the Internet on Oracle's web site. I was able to
+find the javadocs by entering "Java javadoc zip" in my search engine then looking for Oracle's
+name in the web address listings. The file containing the javadocs is a zip file, so you will
+need a zip file extractor to view the contents. If you don't want to download a zip file then
+you can view the javadocs online by typing in "Java <fully qualified class name>" in your
+favorite search engine. For me, I go to www.google.com and type in "Java java.util.Vector" then
+look for the listing with Oracle's name in the web address list.
+</pre>
+</body>
+</html>

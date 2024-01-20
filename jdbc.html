@@ -1,0 +1,150 @@
+<html>
+<head>
+<title>
+BIM Teach Java - JDBC and SQL
+</title>
+</head>
+<body>
+<h2>JDBC and SQL</h2>
+<pre>
+What is JDBC? It is Java Database Connectivity. For many applications we find it useful to save data to files.
+We have already done this with object serialization and random access files, but sometimes it is better
+to use a more standardized database centric approach. SQL, or structured query language, is a well known
+protocol for handling data. There are many DBMS, or database management systems, that implement the SQL
+which is why a brief lesson on Java and SQL is in order. I will be covering only a few SQL statements,
+the entire SQL is beyond the scope of this tutorial. It is possible that you will never have to use
+SQL because of other file system protocols implemented by Java, so if you don't want to use SQL then
+you probably won't have to.
+
+In the current version of the Java Development Kit, the JDBC DBMS called "Java DB" comes prepackaged
+with the kit. You only need to take a few small steps to get it up and running.
+
+First, you must include the Java DB bin folder in the PATH environment variable similar to how we
+did with the bin folder of the JDK in the first lesson of this tutorial. In Microsoft Windows open
+up the "System" window and go to "Advanced system settings" on the left then click on "Environment
+Variables..." near the bottom of the dialog box. In the "System variables" section scroll down to
+the variable named "Path". Click "Edit...". After where you entered the JDK bin folder from lesson 1,
+type in the path to where your JDK is installed then add "\db\bin" directly after it, so the path
+should look similar to <jdk install path here>\db\bin(mine looks like "c:\Program Files\Java\jdk1.8.0_92\db\bin").
+Now you will be able to execute the "ij" command line utility included with "Java DB" which will
+allow you to create databases.
+
+Second, you must place several libraries included with "Java DB" into the installed libraries for
+your JDK. The files you need to copy and paste into your JDK are derby.jar, derbyoptionaltools.jar,
+and derbytools.jar . All three files can be found in <jdk install path>\db\lib . They must be copied
+into <jdk install path>\jre\lib\ext .
+
+Next, we need to create a database. Create a new folder for testing. Open up your command line console
+and navigate to the folder you just created. Execute the command "ij". You should see a line that
+looks like "ij>". Type in the following instruction "connect 'jdbc:derby:MyDbTest;create=true';".
+The last instruction will create a database called MyDbTest in the current folder; you will see
+a new folder called MyDbTest inside the current folder. Any time you want to create a database
+you will need to repeat the instruction with "connect" in it with the "MyDbTest" part of the
+instruction corresponding to the name of the database. So, if you wanted to create another database
+named "MyDatabase" you would execute "ij" and type in the instruction "connect 'jdbc:derby:MyDatabase;create=true';".
+
+Now that we have our Java DB installed and our database created we can write some Java code that
+will process data and manage our database.
+
+Here is the <a href="JDBCExample.java">example</a>:
+<div style="background-color:lightgrey;">import java.sql.*;
+
+class JDBCExample {
+
+  public static void main(String args[]) {
+    try {
+      Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+
+      Connection connection=DriverManager.getConnection("jdbc:derby:MyDbTest");
+
+      Statement statement=connection.createStatement();
+
+      try {
+        statement.execute("DROP TABLE Persons");
+      }
+      catch(Exception ex) {
+      }
+
+      statement=connection.createStatement();
+
+      statement.execute("CREATE TABLE Persons (name varchar(255), phone varchar(255), email varchar(255))");
+
+      statement=connection.createStatement();
+
+      statement.execute("INSERT INTO Persons (name, phone, email) VALUES ('John Smith', '012-345-6789', 'john@test.com')");
+
+      statement=connection.createStatement();
+
+      statement.execute("INSERT INTO Persons (name, phone, email) VALUES ('Joe Smith', '987-654-3210', 'joe@test.com')");
+
+      statement=connection.createStatement();
+
+      statement.execute("INSERT INTO Persons (name, phone, email) VALUES ('Mary Smith', '121-212-1212', 'mary@test.com')");
+
+      statement=connection.createStatement();
+
+      statement.execute("UPDATE Persons SET phone='878-787-8787' WHERE name LIKE 'Mary%'");
+
+      statement=connection.createStatement();
+
+      statement.execute("DELETE FROM Persons WHERE name='Joe Smith'");
+
+      statement=connection.createStatement();
+
+      ResultSet resultSet=statement.executeQuery("select name, phone, email from Persons");
+
+      while (resultSet.next())
+        System.out.println(resultSet.getString(1) + "\t" + resultSet.getString(2) + "\t" + resultSet.getString(3));
+
+      connection.close();
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+}
+</div>
+
+The import statement imports the necessary SQL libraries for our example. In the "main" function
+Class.forName is called to load the jdbc driver into memory. Next, a Connection object is declared
+with its target set to the "MyDbTest" that we created earlier in this lesson.
+
+After we have our connection we need to create statements to execute with our connection.
+
+The statements' operations are:
+<ul>
+<li>DROP TABLE: Delete table</li>
+<li>CREATE TABLE: Create a new table with the given table fields</li>
+<li>INSERT INTO: Insert a record into the table</li>
+<li>UPDATE: Update all records in the table that correspond to the given WHERE clause</li>
+<li>DELETE FROM: Delete all records in the table that correspond to the given WHERE clause</li>
+<li>select: Select all records in the table(a WHERE clause can be specified if desired)</li>
+</ul>
+
+The "DROP TABLE" statement only makes sense for this example. Typically, we would only call
+"DROP TABLE" if we wanted to permanently delete all the data in our table.
+
+The "CREATE TABLE" statement only needs to be executed once in the event that we want to create
+a new table; we wouldn't re-create the same table every time we execute the program. In other
+words, we would create a table once and reuse it whenever some new data needs to be stored
+in persistent files.
+
+Notice the line of code with "UPDATE", in the WHERE clause rather than using an "=" we use the
+word "LIKE". This is necessary because we use a wildcard(the "%"). The "%" means match any
+text with multiple characters, so 'Mary%' will match 'Mary Smith'.
+
+Scroll down to where we declare a ResultSet. The ResultSet stores all the records returned
+from a SELECT query. In the following loop we iterate through all the records returned.
+The "getString" function is called to get the data in each field. Notice how the fields
+aren't indexed starting with 0; they are indexed starting with 1, so "getString(1)" gets
+the first field returned which in our case is the "name" field.
+
+Lastly, we close the connection to our database and the program exits.
+
+In this lesson, you learned how to install "Java DB" and create a database using the "ij"
+command line tool. You learned how to load a jdbc driver into memory and how to use
+DriverManager to return a connection to a database. Also, you learned how to create
+statements that are used to execute commands over your connection.
+</pre>
+</body>
+</html>

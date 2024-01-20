@@ -1,0 +1,124 @@
+<html>
+<head>
+<title>
+BIM Teach Java - Math Functions
+</title>
+</head>
+<body>
+<h2>Math Functions</h2>
+<pre>
+In Java many functions related to math can be found in the class java.lang.Math . If you are planning
+on using Java for geometry or trigonometry it is worthwhile to examine the javadoc for java.lang.Math .
+
+Here is an <a href="MathDice.java">example</a>:
+<div style="background-color:lightgrey;">/*
+Simulates rolling dice depending on how many dice are included on the command line as arguments.
+Prints out each individual dice result and prints out the sum of all the dice rolls.
+*/
+
+class MathDice {
+
+  public static void main(String args[]) {
+    try {
+      if(args.length==0) {
+        System.out.println("Usage:");
+        System.out.println("  java MathDice <# of dice sides for 1st> <# of dice sides for 2nd> ...");
+
+        return;
+      }
+
+      int intSum=0;
+
+      for(int i=0;i&lt;args.length;i++) {
+        double dblNumberOfSides=Double.valueOf(args[i]).doubleValue();
+
+        if(dblNumberOfSides<1.0d)
+          throw new Exception("Invalid number of sides.");
+
+        dblNumberOfSides=dblNumberOfSides-1.0d;
+
+        double dblRoll=Math.random()*dblNumberOfSides;
+        dblRoll=Math.rint(dblRoll);
+        dblRoll=dblRoll+1.0d;
+
+        int intRoll=(int)dblRoll;
+
+        intSum=intSum+intRoll;
+
+        System.out.println("Individual roll #"+i+": "+intRoll);
+      }
+
+      System.out.println("\nSum of all dice: "+intSum);
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+}
+</div>
+
+The example above accepts dice as arguments on the command line. It uses the static "random" function
+from java.lang.Math . The "random" function produces a random number from 0.0 to just below 1.0(all
+values are less than 1.0). If the "dblNumberOfSides" is a value less than 1.0 then we force a new
+Exception to be thrown because a dice can't have less than 1 side in our virtual dice rolling application.
+If the Exception is thrown then the code stops execution at its current location and proceeds directly
+to the code in "catch(Exception ex)". After the "random" function is called we call the "rint" function
+which stands for round to nearest integer. If the value passed into "rint" is less than 0.5
+then the value returned by "rint" is 0.0 . If the value passed into "rint" is greater than 0.5 then
+the value returned by "rint" is 1.0 . If the value passed into "rint" is equal to 0.5 then the
+result returned is ambiguous; it could return 0.0d or it could return 1.0d.
+
+So, if the user specifies a dice with 6 sides then the number 6 has 1 subtracted from it making
+it 5 then it is multiplied by "random" which assigns a value from 0 to 5 to the "dblRoll" variable.
+Next, "rint" is called to round the integer to 0, 1, 2, 3, 4, or 5. Next, 1 is added to that "dblRoll"
+making the computed roll 1, 2, 3, 4, 5, or 6 which is what is desired as a random number for a
+6 sided dice. The result is then added to sum and printed out. After the loop is done executing
+the sum of all of the dice rolls is printed out.
+
+
+In the next example we will use the "floor" function of Math to select a "random" day of the week
+that we will cook pasta on.
+
+Here is the <a href="MathFloor.java">example</a>:
+<div style="background-color:lightgrey;">/*
+Randomly chooses the day of the week that pasta should be cooked on.
+*/
+
+class MathFloor {
+
+  public static void main(String args[]) {
+    try {
+      String strDays[]={"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+
+      double dblRandom=Math.random()*((double)strDays.length);
+      double dblFloor=Math.floor(dblRandom);
+
+      int intFloor=(int)dblFloor;
+
+      System.out.println("Cook pasta on "+strDays[intFloor]+".");
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+}
+</div>
+
+A String array is declared and initialized with the days of the week. A random is generated and multiplied
+by the length of the array "strDays". Notice how the "length" specifier of array is an int and has to be
+casted to double to prevent loss of precision. At this point the value in "dblRandom" is a number from 0.0 to
+just below 7.0 . Next, the "floor" function is called making the value 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 then
+it is casted to an int. "floor" always round the number passed in down to the nearest integer. For example,
+3.1 becomes 3.0, 3.5 becomes 3.0, 3.9 becomes 3.0 . Lastly, that int in "intFloor" is used as an index into
+the array "strDays" to print out one of the days of the week.
+
+
+The function "ceil" in Math is rarely used in my experiences, but it works similar to "floor" except that
+it always rounds up to the nearest integer. For example, 5.1 becomes 6.0, 5.5 becomes 6.0, 5.9 becomes 6.0 .
+
+In this lesson you learned how to utilize the "random", "rint", "floor", "ceil" functions of the
+java.lang.Math class. You learned about casting variables to proper primitive classes for using
+floating point arithmetic.
+</pre>
+</body>
+</html>

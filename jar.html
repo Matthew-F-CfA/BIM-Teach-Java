@@ -1,0 +1,88 @@
+<html>
+<head>
+<title>
+BIM Teach Java - JAR Files
+</title>
+</head>
+<body>
+<h2>JAR Files</h2>
+<pre>
+Up to this point we have been compiling Java source files and executing classes. In this lesson,
+we will create Java archive files which store Java class files and can be executed by windowed
+operating systems such as Microsoft Windows by double clicking on the JAR file.
+
+Download this <a href="HelloWorldGUI.java">file of HelloWorldGUI</a> and place it in a folder called helloWorldPackage.
+
+Download this <a href="HelloWorldGUI.mf">meta file</a> for storing the main-class to execute when double clicking the JAR,
+and place the file in the folder containing the helloWorldPackage folder.
+
+Next, from the folder containing the helloWorldPackage folder execute the following command:
+jar -cmfv HelloWorldGUI.mf HelloWorldGUI.jar helloWorldPackage/*
+
+Now, if everything happened without error, there is a file named HelloWorldGUI.jar in the folder where
+the jar command was executed that can be executed similar to a class file using the java command:
+java -jar HelloWorldGUI.jar
+
+The HelloWorldGUI.jar file can also be executed by double clicking on it.
+
+The manifest file(the one ending with "mf") has TWO lines. The first is the words "Main-Class: " then
+the class containing the "main" function that should be executed when the JAR is executed. The second
+line is a blank line that is necessary for proper execution; just press the Enter key on your keyboard
+after typing in the Main-Class name.
+
+The "-cmfv" section of the jar command tool stands for the following:
+<ul>
+<li>c = create a jar</li>
+<li>m = manifest will be specified: HelloWorldGUI.mf is the manifest</li>
+<li>f = this is a file operation, an output file will be specified: HelloWorldGUI.jar is the JAR</li>
+<li>v = verbose: print the output from processing this jar command to the standard output stream</li>
+</ul>
+
+The last argument is helloWorldPackage/* which translates to including all the files and folders in
+helloWorldPackage in the JAR file.
+
+
+Here is the command for viewing all the files in the JAR file:
+jar -tfv HelloWorldGUI.jar
+
+Try copying the file(using the operating system's copy mechanism) HelloWorldGUI.jar to a new folder
+and navigate to that folder using the "cd" command in your command line console then once you have
+arrived at that folder execute the following command to extract all of the files in the JAR file:
+jar -xfv HelloWorldGUI.jar
+
+
+Generally speaking, those are the three types of commands you will be executing with the jar command
+line utility: archiving, viewing, and inflating.
+
+
+The next source file is a utility I wrote for searching for a class file within a folder that contains
+one or more JAR files. This utility is useful when downloading other programmer's libraries and your
+not sure which JAR file contains which classes. The utility requires two command line arguments:
+the file system's folder to search in and the name of the class to search for(do not include
+the .class extension).
+<a href="JarClassSearcher.java">Download JarClassSearcher.java</a>.
+
+
+I am including another source file for a utility that will programmatically inflate all of the
+contents of a JAR file. This utility is useful when you want to allow the user to inflate
+the JAR without knowing the details of the jar command line utility by simply double clicking
+on the JAR file.
+<a href="JarFileInflator.java">Download JarFileInflator.java</a>.
+<a href="JarFileInflator.mf">Download JarFileInflator.mf Manifest File</a>
+
+You can test out the JarFileInflator utility by navigating to the folder where you have downloaded
+the <a href="HelloWorld.java">HelloWorld.java</a> file and copying the class file for JarFileInflator and the manifest
+file JarFileInflator.mf listed above to the same folder as HelloWorld.java then executing the
+following command:
+jar -cmfv JarFileInflator.mf HelloWorld.jar JarFileInflator.class HelloWorld.java
+
+Now you should see a new file called HelloWorld.jar . Copy this file to an empty directory and try
+double clicking on the JAR file. The contents of the JAR file should inflate into the directory
+containing the JAR file.
+
+In this lesson, you learned how to use the jar command line utility: archiving, viewing, and inflating.
+You practiced with creating a simple manifest file that can be used to set the Main-Class that is
+executed when a JAR file is double clicked.
+</pre>
+</body>
+</html>

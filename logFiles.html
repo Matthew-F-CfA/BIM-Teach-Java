@@ -1,0 +1,132 @@
+<html>
+<head>
+<title>
+BIM Teach Java - Log Files
+</title>
+</head>
+<body>
+<h2>Log Files</h2>
+<pre>
+Log files are files that store information about how your software is being used. They can be useful in
+keeping inventory of when and which functions are being called, and then being used in debugging your program.
+
+In the following example, a log file is created to keep track of which food menu items are being ordered.
+The output file path is "log/LogMeals.txt".
+
+Here is the <a href="MealChooser.java">example</a>:
+<div style="background-color:lightgrey;">import java.io.*;
+
+class MealChooser {
+  static int HAM_AND_BEANS=0;
+  static int PASTA_WITH_MEAT_SAUCE=1;
+  static int TACOS=2;
+  static int STEAK_AND_CHEESE_GRINDER=3;
+  static int DOUBLE_CHEESE_BURGER=4;
+  static int CAESAR_SALAD=5;
+
+  static String MEAL_STRINGS[]=new String[0];
+
+  static {
+    MEAL_STRINGS=new String[6];
+
+    MEAL_STRINGS[HAM_AND_BEANS]="Ham and Beans";
+    MEAL_STRINGS[PASTA_WITH_MEAT_SAUCE]="Pasta with Meat Sauce";
+    MEAL_STRINGS[TACOS]="Tacos";
+    MEAL_STRINGS[STEAK_AND_CHEESE_GRINDER]="Steak and Cheese Grinder";
+    MEAL_STRINGS[DOUBLE_CHEESE_BURGER]="Double Cheese Burger";
+    MEAL_STRINGS[CAESAR_SALAD]="Caesar Salad";
+  }
+
+  public static void main(String args[]) {
+    try {
+      System.out.println("To use our menu, enter the number corresponding to the meal you would like to order.");
+
+      BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
+
+      do {
+        System.out.println("Menu:");
+        for(int i=0;i&lt;MEAL_STRINGS.length;i++) {
+          System.out.println(i+"> "+MEAL_STRINGS[i]);
+        }
+
+        String strNextChoose=br.readLine();
+
+        int intNextChoose=-1;
+        try {
+          intNextChoose=Integer.parseInt(strNextChoose);
+        }
+        catch(Exception ex) {
+          System.out.println("Unrecognized choice: "+strNextChoose+"\n");
+
+          continue;
+        }
+
+        if(intNextChoose&lt;0 || intNextChoose&gt;=MEAL_STRINGS.length) {
+          System.out.println("Unrecognized choice: "+strNextChoose+"\n");
+
+          continue;
+        }
+
+        System.out.println("You chose to order "+MEAL_STRINGS[intNextChoose]+"\n");
+
+        writeToLogFile(MEAL_STRINGS[intNextChoose]);
+
+      } while(true);
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  public static void writeToLogFile(String strMessage) throws Exception {
+    if(!(new File("log").exists())) {
+      new File("log").mkdirs();
+    }
+    String strFileSep=System.getProperty("file.separator");
+    String strFilePath="log"+strFileSep+"LogMeals.txt";
+    File fileLog=new File(strFilePath);
+    RandomAccessFile raf=new RandomAccessFile(fileLog, "rw");
+    raf.seek(fileLog.length());
+    raf.writeBytes(strMessage);
+    raf.write(13);
+    raf.write(10);
+    raf.close();
+  }
+}
+</div>
+
+Notice the line of code directly following the classes field declarations that reads "static {".
+This line indicates that a static initializer is being written. A static initializer is used for
+initializing static variables. In this instance, a static initializer isn't necessary to initialize
+the static field MEAL_STRINGS, but I wanted to introduce you to the syntax for implementing a
+static initializer.
+
+You can scroll down the code until you come to the function call "writeToLogFile" which accepts
+a single parameter of type String; the String that will be written to the log file. Scroll
+down farther until you see the function signature "public static void writeToLogFile(String strMessage)",
+note that there is an extra bit of text following the signature that reads "throws Exception".
+Essentially, by writing "throws Exception" after the signature we are telling the compiler
+that the function which calls the "writeToLogFile" function will provide a "try catch" block
+for handling any exceptions that will be thrown inside the "writeToLogFile" function. For this
+example source file, the "main" function contains a "try catch" block that contains the call
+to "writeToLogFile", and that "try catch" block will catch any exceptions thrown.
+
+In the "writeToLogFile" function we check to make sure a directory exists in the current directory
+called "log". If it doesn't exist then we create the directory by using the "mkdirs" function.
+Next, we retrieve the operating system specific file separator by using the "getProperty" function.
+After that, we construct a file path using the directory file separator and file name of the log file.
+
+Next, in the "writeToLogFile" function we make use of an Object called RandomAccessFile which implements
+DataOutput and DataInput interfaces for reading and writing primitives and Strings. The class
+RandomAccessFile allows you to navigate to specific bytes in the File, which it is reading, and
+to read or write at that specific location. In this example, we use the function "seek" to
+navigate to the end of the file, so we can append a message to the end of the file.
+We call "writeBytes" which writes a String to the file then we call "write" with the parameters
+13 and 10 which are carriage return and line feed characters which make it so that each message
+we write to the file is on a new line.
+
+In this lesson, you learned how to implement a log file by using file path logic, exception handling,
+and RandomAccessFile for appending to a file.
+</pre>
+</body>
+</html>

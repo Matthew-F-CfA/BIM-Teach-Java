@@ -1,0 +1,452 @@
+<html>
+<head>
+<title>
+BIM Teach Java - java.awt.image.BufferedImage
+</title>
+</head>
+<body>
+<h2>java.awt.image.BufferedImage</h2>
+<pre>
+BufferedImage is an object that stores an image that can be drawn using a Component's "paint" function's
+Graphics object by using the function "drawImage". Java provides several ways of setting the pixel data
+of a BufferedImage including "getRGB" and "setRGB" functions of BufferedImage. Another way that
+the buffer of pixel data can be modified is by
+<div style="background-color:lightgrey">int intPixels[]=((DataBufferInt)bufferedImage.getRaster().getDataBuffer()).getData();
+</div>
+In the following example, the second implementation is used for modifying the transparency of one color
+that has been drawn in the BufferedImage.
+
+I apologize in advance for the complexity of the next example, there isn't really a more simple way
+of demonstrating the drawing to a canvas, loading, saving, and transparency of a BufferedImage.
+
+Here is the <a href="BufferedImageSample.java">example</a>:
+<div style="background-color:lightgrey">import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.*;
+import javax.imageio.*;
+import javax.imageio.stream.*;
+import java.util.Iterator;
+import java.io.*;
+
+class BufferedImageSample {
+
+  public static void main(String args[]) {
+    BufferedImageSample tObj=new BufferedImageSample();
+
+    BufferedImageSample.BufferedImageFrameImage bFrame=tObj.new BufferedImageFrameImage();
+    BufferedImageSample.BufferedImageFrameDisplayer bFrame2=tObj.new BufferedImageFrameDisplayer(bFrame);
+
+    Dimension dimScreen=Toolkit.getDefaultToolkit().getScreenSize();
+
+    bFrame.setSize(dimScreen.width, dimScreen.height-40);
+    bFrame.setVisible(true);
+
+    bFrame2.setSize(dimScreen.width, dimScreen.height-40);
+    bFrame2.setVisible(true);
+
+    bFrame.bufferedImageCanvas.initCanvas();
+  }
+
+  class BufferedImageFrameImage extends Frame
+  implements ActionListener, ItemListener {
+    BufferedImageCanvasImage bufferedImageCanvas=new BufferedImageCanvasImage();
+    List lstColors=new List(5);
+    Button btnSetTransluscent=new Button("Set Transluscent Color");
+
+    Menu menuFile=new Menu("File");
+    MenuItem menuFileLoad=new MenuItem("Load");
+    MenuItem menuFileSave=new MenuItem("Save");
+
+    BufferedImageFrameImage() {
+      super("Buffered Image Sprite");
+
+      setIconImage(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB));
+
+      add("Center", bufferedImageCanvas);
+ 
+      lstColors.add("red");
+      lstColors.add("green");
+      lstColors.add("blue");
+
+      Panel tempPan=new Panel();
+      tempPan.setLayout(new BorderLayout());
+      tempPan.add("Center", lstColors);
+      lstColors.addItemListener(this);
+      tempPan.add("South", btnSetTransluscent);
+      btnSetTransluscent.addActionListener(this);
+
+      add("South", tempPan);
+
+      menuFile.add(menuFileLoad);
+      menuFileLoad.addActionListener(this);
+      menuFile.add(menuFileSave);
+      menuFileSave.addActionListener(this);
+
+      MenuBar mBar=new MenuBar();
+      mBar.add(menuFile);
+      setMenuBar(mBar);
+    }
+
+    public void itemStateChanged(ItemEvent ie) {
+      Object evSource=ie.getSource();
+
+      if(evSource==lstColors) {
+        int intSelectedIndex=lstColors.getSelectedIndex();
+        if(intSelectedIndex==-1)
+          return;
+
+        String strSelectedItem=lstColors.getSelectedItem();
+
+        if(strSelectedItem.equals("red")) {
+          bufferedImageCanvas.clrCurrent=Color.red;
+        }
+        else if(strSelectedItem.equals("green")) {
+          bufferedImageCanvas.clrCurrent=Color.green;
+        }
+        else if(strSelectedItem.equals("blue")) {
+          bufferedImageCanvas.clrCurrent=Color.blue;
+        }
+      }
+    }
+
+    public void actionPerformed(ActionEvent ae) {
+      Object evSource=ae.getSource();
+
+      if(evSource==menuFileLoad) {
+        try {
+          File fileImg=new File("BufferedImageSampleImage.png");
+
+          ImageInputStream input=ImageIO.createImageInputStream(fileImg);
+
+          Iterator&lt;ImageReader&gt; readers=ImageIO.getImageReaders(input);
+
+          if(!readers.hasNext()) {
+            input.close();
+
+            throw new IllegalArgumentException("No reader for: " + fileImg); // Or simply return null
+          }
+
+          ImageReader reader = readers.next();
+
+          reader.setInput(input);
+
+          // Configure the param to use the destination type you want
+          ImageReadParam param = reader.getDefaultReadParam();
+          param.setDestinationType(ImageTypeSpecifier.createFromBufferedImageType(BufferedImage.TYPE_INT_ARGB));
+
+          bufferedImageCanvas.bufferedImage=reader.read(0, param);
+
+          bufferedImageCanvas.repaint();
+
+          reader.dispose();
+
+          input.close();
+        }
+        catch(Exception ex) {
+          ex.printStackTrace();
+        }
+      }
+      else if(evSource==menuFileSave) {
+        try {
+          File fileImg=new File("BufferedImageSampleImage.png");
+
+          ImageIO.write(bufferedImageCanvas.bufferedImage, "png", fileImg);
+        }
+        catch(Exception ex) {
+          ex.printStackTrace();
+        }
+      }
+      else if(evSource==btnSetTransluscent) {
+        int intSelectedIndex=lstColors.getSelectedIndex();
+        if(intSelectedIndex==-1)
+          return;
+
+        BufferedImage bufferedImage=bufferedImageCanvas.bufferedImage;
+
+        int intTransluscentColor=-1;
+
+        String strSelectedItem=lstColors.getSelectedItem();
+
+        if(strSelectedItem.equals("red")) {
+          intTransluscentColor=255&lt;&lt;16;
+        }
+        else if(strSelectedItem.equals("green")) {
+          intTransluscentColor=255&lt;&lt;8;
+        }
+        else if(strSelectedItem.equals("blue")) {
+          intTransluscentColor=255;
+        }
+
+
+        DataBufferInt dbi=(DataBufferInt)bufferedImage.getRaster().getDataBuffer();
+        int intPixels[]=dbi.getData();
+
+
+        int intRGBMask=-1;
+        int intRed=255;
+        intRed=intRed&lt;&lt;16;
+        int intGreen=255;
+        intGreen=intGreen&lt;&lt;8;
+        int intBlue=255;
+        intRGBMask=intRed|intGreen|intBlue;
+
+        int intTransluscentMask=255;
+        intTransluscentMask=intTransluscentMask&lt;&lt;24;
+
+        for(int i=0;i&lt;intPixels.length;i++) {
+          int intNextPixel=intPixels[i];
+          intNextPixel=intNextPixel&intRGBMask;
+
+          if(intNextPixel==intTransluscentColor || intNextPixel==0) {
+            intPixels[i]=intNextPixel;
+          }
+          else {
+            intPixels[i]=intNextPixel|intTransluscentMask;
+          }
+        }
+
+        bufferedImageCanvas.repaint();
+      }
+    }
+  }
+
+  class BufferedImageFrameDisplayer extends Frame {
+    BufferedImageFrameImage bufferedImageFrameImage;
+    BufferedImageCanvasDisplayer bufferedImageCanvas=new BufferedImageCanvasDisplayer();
+
+    BufferedImageFrameDisplayer(BufferedImageFrameImage bufferedImageFrameImage) {
+      super("Buffered Image Sprite Displayer");
+      this.bufferedImageFrameImage=bufferedImageFrameImage;
+
+      bufferedImageCanvas.bufferedImageFrameImage=bufferedImageFrameImage;
+
+      setIconImage(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB));
+
+      add("Center", bufferedImageCanvas);
+    }
+  }
+
+  class BufferedImageCanvasImage extends Canvas
+  implements MouseListener {
+    Color clrCurrent=Color.red;
+    BufferedImage bufferedImage;
+    Graphics bufferedImageGraphics;
+
+    BufferedImageCanvasImage() {
+      super();
+
+      addMouseListener(this);
+    }
+
+    public void initCanvas() {
+      Dimension dimCanvas=getSize();
+      bufferedImage=new BufferedImage(dimCanvas.width, dimCanvas.height, BufferedImage.TYPE_INT_ARGB);
+      bufferedImageGraphics=bufferedImage.getGraphics();
+
+      repaint();
+    }
+
+    public void mouseEntered(MouseEvent me) {
+    }
+
+    public void mouseExited(MouseEvent me) {
+    }
+
+    public void mousePressed(MouseEvent me) {
+    }
+
+    public void mouseReleased(MouseEvent me) {
+    }
+
+    public void mouseClicked(MouseEvent me) {
+      Point mePoint=me.getPoint();
+      int meX=mePoint.x;
+      int meY=mePoint.y;
+
+      bufferedImageGraphics.setColor(clrCurrent);
+
+      bufferedImageGraphics.fillRect(meX, meY, 50, 50);
+
+      repaint();
+    }
+
+    public void paint(Graphics graph) {
+      if(bufferedImage==null)
+        return;
+
+      graph.drawImage(bufferedImage, 0, 0, null);
+    }
+  }
+
+  class BufferedImageCanvasDisplayer extends Canvas
+  implements MouseMotionListener {
+    BufferedImageFrameImage bufferedImageFrameImage;
+    int intMouseMovedX=0;
+    int intMouseMovedY=0;
+
+    BufferedImageCanvasDisplayer() {
+      super();
+
+      addMouseMotionListener(this);
+    }
+
+    public void mouseMoved(MouseEvent me) {
+      Point mePoint=me.getPoint();
+      intMouseMovedX=mePoint.x;
+      intMouseMovedY=mePoint.y;
+
+      repaint();
+    }
+
+    public void mouseDragged(MouseEvent me) {
+    }
+
+    public void paint(Graphics graph) {
+      Color clrPrev=graph.getColor();
+
+      graph.setColor(Color.gray);
+
+      graph.fillRect(0, 0, getSize().width, getSize().height);
+
+      BufferedImage bufferedImage=bufferedImageFrameImage.bufferedImageCanvas.bufferedImage;
+      int intImageWidth=bufferedImage.getWidth();
+      int intImageHeight=bufferedImage.getHeight();
+
+      graph.drawImage(bufferedImage, intMouseMovedX-intImageWidth/2, intMouseMovedY-intImageHeight/2, null);
+
+      graph.setColor(clrPrev);
+    }
+  }
+}
+</div>
+
+When you run the example, after compiling, using "java BufferedImageSample" two frames are made visible.
+The first frame is for clicking and drawing the colors red, green, and blue onto a BufferedImage.
+The second frame is for moving the mouse to position the image on the frame; you will see modifications
+made from the first frame displayed as an overlay onto the second frame. The first frame has a white
+background and the second frame has a grey background.
+
+The first frame has a menu called "File" which has two MenuItems: "Load" and "Save". These MenuItems
+are for loading and saving the BufferedImage into a File named "BufferedImageSampleImage.png" using
+javax.imageio.ImageIO static function "write" for saving the file and using an ImageReader(from javax.imageio)
+and an ImageInputStream(from javax.imageio.stream) for loading the file. You can see the code implemented
+for loading and saving the BufferedImage file by using your text editor's "Find" tool and entering
+"menuFileLoad" and "menuFileSave" respectively. Saving is relatively straight forward. Loading
+is much more complicated. The complication is necessary because when modifying the BufferedImage
+we make use of a DataBufferInt object that stores the BufferedImage's Raster data, and ImageIO's
+"read" function reads in a DataBufferByte object by default into the BufferedImage. So, to get
+around that problem we use an ImageReader and ImageReadParam to
+"setDestinationType(ImageTypeSpecifier.createFromBufferedImageType(BufferedImage.TYPE_INT_ARGB))"
+which tells the ImageReader to read in the BufferedImage with a DataBufferInt storage instead
+of DataBufferByte.
+
+Scroll down a little farther in the "actionPerformed" function and you will see the code for
+"btnSetTransluscent". This is where we make pixels matching a selected color into transparent
+pixels. In this example, the three color choices are red, green, and blue. In this section
+of code we make use of the bit shift operator "&lt;&lt;" which shifts the location of bits
+by a specified number. Bits are the smallest recognizable pieces of data in a computer system;
+a byte is 8 bits and we use bytes to define most other data on a computer. The pixels in
+our BufferedImage are defined as ints which are 32 bits in length. The first 8 bits are
+the blue component. The second 8 bits are the green component. The third 8 bits are the
+red component. The fourth 8 bits are the alpha component. The alpha component is the
+component that defines the transparency.
+
+The next code snippet shows how to define the transluscent color in a 32 bit pixel.
+The number 255 is the maximum number storable using a single byte. It is a value
+where all 8 bits are set to the "on" value. The number appearing after the "&lt;&lt;"
+is the number of bit positions to shift the bits. So, "255&lt;&lt;16" means shift
+the bit values contained in 255 over 16 bit locations, so after the shift the "on"
+bits are positioned to appear at bit locations 16-24.
+<div style="background-color:lightgrey;">        if(strSelectedItem.equals("red")) {
+          intTransluscentColor=255&lt;&lt;16;
+        }
+        else if(strSelectedItem.equals("green")) {
+          intTransluscentColor=255&lt;&lt;8;
+        }
+        else if(strSelectedItem.equals("blue")) {
+          intTransluscentColor=255;
+        }
+</div>
+
+Next, notice the code where we declare the variable "intPixels[]" by getting the raster and
+data buffer for the BufferedImage. We need the pixel buffer because we are going to use
+a "for" loop to iterate through and search for occurences of the color specified as
+transluscent. Before the "for" loop we create a mask for the first 24 bits of each int
+we check.
+
+This next line of code creates the mask:
+<div style="background-color:lightgrey;">        intRGBMask=intRed|intGreen|intBlue;
+</div>
+
+The bitwise "|" operator stands for "or" in bit operations. In an "or" operation only
+one of any bit location has to be evaluated as "on" for the resulting assignment variable
+to have an "on" value. For example:
+1011=0011|1000
+The value on the left is the resulting assignment variable. Each 1 or 0 is a single bit.
+The value on the left gets a value of 1 if either of the operands next to the "|" have
+a 1 in that bit location. The third bit is a 0 because neither of the operands next to
+the "|" have a 1 in the third bit location. Also, notice how the bit locations are
+read from right to left with the rightmost position being the first bit location.
+
+Basically, the "intRGBMask" is going to be used to filter out the transparency byte from
+each int pixel. The code for doing the actual filtering is:
+<div style="background-color:lightgrey;">          intNextPixel=intNextPixel&intRGBMask;
+</div>
+It uses the bitwise "&" operator which stands for "and" in bit operations. In an "and"
+operation both of the bits in a particular bit location must be "on" in order for the
+resulting assignment variable to have an "on" value in that bit location.
+Therefore, the "intNextPixel" can only have "on" values in the bit locations from 1-24
+which are the components red, green, and blue.
+
+Next, an "if" condition follows where we check to see if the particular int pixel is
+the same color as the transluscent color. If it is then set the "intPixel" array's
+index to a value with 0 for the alpha component which tells the BufferedImage that
+the particular pixel is completely transparent. If the "if" condition doesn't
+evaluate to true then the "else" condition occurs, and an alpha component with
+value 255 is "or"d with the color in "intNextPixel" which tells the BufferedImage
+that the particular pixel is completely opaque.
+
+Scroll down to the class declaration for "BufferedImageCanvasImage" in this inner class
+we include an "initCanvas" function for creating the BufferedImage with the same
+width and height as the Canvas, and we create a Graphics object for the BufferedImage(
+note that a new Graphics object is created whenever "getGraphics" of BufferedImage is
+called, so just call "getGraphics" once and use a variable to store the returned Graphics
+object). The "initCanvas" function is called in "main" after the size of the frames
+is set and the frames are made visible because only after that has taken place is the
+Canvas's "getSize" function valid.
+
+Farther down in the BufferedImageCanvasImage's definition we arrive at the "paint"
+function which checks to see if the BufferedImage has been initialized. If not,
+the function returns before calling "drawImage". The "drawImage" function takes
+parameters of Image, x position of top left corner of image, y position of top
+left corner of image, ImageObserver which is often set to null.
+
+Scroll down to the class definition of "BufferedImageCanvasDisplayer" and notice
+that a BufferedImageFrameImage object has been declared in the class field section.
+We set this field after the objects have been constructed in the constructor
+for BufferedImageFrameDisplayer. We also declare a couple of ints for storing
+the last mouse position determined by the "mouseMoved" function of MouseMotionListener.
+These ints are used when redrawing the Canvas.
+
+The "paint" function of BufferedImageCanvasDisplayer uses "drawImage" to draw
+the BufferedImage centered around the current mouse pointer's position, so
+if the mouse pointer is near the center of the screen then nearly the enter
+BufferedImage from our other Canvas is displayed in the Canvas of
+BufferedImageCanvasDisplayer.
+
+If you have not done so already, try clicking around the canvas of the frame
+with the title "Buffered Image Sprite" and clicking the colors listed near
+the bottom of the frame and clicking some more in the canvas. There should
+be several colors on the canvas. Next, try clicking "Set Transluscent Color"
+with one of the colors selected. You will notice that the color was made
+transparent and can no longer be seen in the frame. The rectangles with
+the transparent color won't appear on the other frame's canvas either
+if you switch to that frame and try moving the mouse around.
+
+In this lesson, you learned about drawing images using "drawImage" of the Graphics
+object. Loading and saving a BufferedImage using javax.imageio.stream.ImageInputStream
+and javax.imageio.ImageIO . Lastly, you learned about transparency using bitwise
+operations, masks, and data buffers.
+</pre>
+</body>
+</html>

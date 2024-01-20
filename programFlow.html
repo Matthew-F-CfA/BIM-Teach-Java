@@ -1,0 +1,220 @@
+<html>
+<head>
+<title>
+BIM Teach Java - Program Flow
+</title>
+</head>
+<body>
+<h2>Program Flow</h2>
+<pre>
+The normal flow of a program follows a line by line progression from the top instruction in a function
+then down the list of instructions that follow the last instruction in the sequence. In our examples,
+we mostly saw this through the use of the "main" function. "main" was our entry point into the program's
+execution. Some programming logic keywords and function calls can change the flow of the program.
+We have seen some of these keywords such as the "if" type conditions and various loops such as "for",
+"do while", and "while".
+
+Here is an example of if and else conditions:
+<div style="background-color:lightgrey;">boolean blnTrueOrFalse=true;
+if(blnTrueOrFalse)
+  System.out.println("0:true");
+else
+  System.out.println("0:false");
+
+blnTrueOrFalse=false;
+if(blnTrueOrFalse)
+  System.out.println("1:true");
+else
+  System.out.println("1:false");
+
+if(!blnTrueOrFalse)
+  System.out.println("2:false");
+else
+  System.out.println("2:true");
+</div>
+
+Try writing your own class with a "main" function and copying the code above into the "main" function
+and execute that class. If you aren't sure how to write the class then use this <a href="IfAndElse.java">example</a>.
+The output you see is:
+0:true
+1:false
+2:false
+
+The next example uses boolean AND("&&") and OR("||") operators for making more than one evaluation for a single "if"
+condition. For example, if name isn't null and name equals some name then do the following code.
+
+Here is the <a href="AndAndOr.java">example</a>:
+<div style="background-color:lightgrey;">class AndAndOr {
+
+  public static void main(String args[]) {
+    if(args.length==0) {
+      System.out.println("Usage:");
+      System.out.println("  java AndAndOr <true or false> <true or false>");
+      System.out.println("For example:");
+      System.out.println("  java AndAndOr true true");
+
+      return;
+    }
+
+    boolean blnFirst=Boolean.valueOf(args[0]).booleanValue();
+    boolean blnSecond=Boolean.valueOf(args[1]).booleanValue();
+
+    if(blnFirst && blnSecond) {
+      System.out.println("blnFirst AND blnSecond evaluated to true.");
+    }
+    else {
+      System.out.println("blnFirst AND blnSecond evaluated to false.");
+    }
+
+    if(blnFirst || blnSecond) {
+      System.out.println("blnFirst OR blnSecond evaluated to true.");
+    }
+    else {
+      System.out.println("blnFirst OR blnSecond evaluated to false.");
+    }
+  }
+}
+</div>
+
+Try executing the above example with the following command line text:
+<ul>
+<li>java AndAndOr true true</li>
+<li>java AndAndOr true false</li>
+<li>java AndAndOr false true</li>
+<li>java AndAndOr false false</li>
+</ul>
+Examine the output to get an idea of how && and || help evaluate conditions.
+
+Here is another <a href="AndConditionWithString.java">example</a>:
+<div style="background-color:lightgrey;">class AndConditionWithString {
+
+  public static void main(String args[]) {
+    if(args.length==1 && args[0].equals("John")) {
+      System.out.println("args.length is 1 and args[0] is the String \"John\".");
+    }
+    else {
+      System.out.println("Either args.length isn't 1 or args[0] isn't the String \"John\".");
+    }
+
+
+    String strName=null;
+    if(strName!=null && strName.equals("Joe")) {
+      System.out.println("strName equals \"Joe\".");
+    }
+    else {
+      System.out.println("strName doesn't equals \"Joe\".");
+    }
+
+    strName="Joe";
+    if(strName!=null && strName.equals("Joe")) {
+      System.out.println("strName equals \"Joe\".");
+    }
+    else {
+      System.out.println("strName doesn't equals \"Joe\".");
+    }
+  }
+}
+</div>
+
+The above example checks args.length to see if it is equal to 1 if it isn't equal to 1 then
+the second condition isn't evaluated. That is the difference between using "&&" and "&"; the
+"&&" evaluates the first operator to see if it is valid before processing the second operator.
+The same functionality is in effect for "||" and "|". Some programmers prefer to use "&&"
+in the situation where a pointer is checked to see if it is null before checking its value
+in the second condition which is what we have done in the second and third "if" blocks.
+
+Here is an <a href="Loops.java">example</a> of loops where we can execute the same instruction a number of times:
+<div style="background-color:lightgrey;">class Loops {
+
+  public static void main(String args[]) {
+    for(int i=0;i&lt;3;i++) {
+      System.out.println(i);
+    }
+
+    int i=0;
+    while(i&lt;3) {
+      System.out.println(i);
+
+      ++i;
+    }
+
+    i=0;
+    do {
+      System.out.println(i);
+
+      ++i;
+    } while(i&lt;3);
+  }
+}
+</div>
+
+Each one of these loops does the same thing. They print out 0, 1, and 2 to standard output. When the
+code starts to execute in the loop, it is processed in the same top to bottom sequence as most code
+follows, but when the code reaches the curly brace "}" the code makes an evaluation of a boolean
+condition to see if the next instruction to execute should be at the top of the loop block or if
+the loop should be exited. In each of the loops, the loop is exited when "i==3".
+
+In the next example, we create a for loop and make use of the instructions "continue;" and "break;".
+Continue tells the code to immediately jump to the beginning of the loop and continue executing
+from that location. Break tells the code to immediately exit the loop and continue executing
+instructions after the end of the loop.
+
+Here is the <a href="Loops2.java">example</a>:
+<div style="background-color:lightgrey;">class Loops2 {
+
+  public static void main(String args[]) {
+    for(int i=0;i&lt;5;i++) {
+      if(i==1)
+        continue;
+      else if(i==4)
+        break;
+
+      System.out.println(i);
+    }
+  }
+}
+</div>
+
+When you execute the code the output displayed will be:
+0
+2
+3
+
+This happens because when the int "i" is 1 the loop continues before reaching the "println"
+function. Also, the 4 isn't printed out because the loop breaks before the "println" function.
+
+Another way that program flow can be altered is if the current instruction being processed is
+a function call. If a function call is encountered then program execution immediately jumps to
+the function being called. Here is an <a href="FunctionCall.java">example</a>:
+<div style="background-color:lightgrey;">class FunctionCall {
+
+  public static void main(String args[]) {
+    System.out.println("1");
+    System.out.println("2");
+    System.out.println("3");
+
+    callingStaticFunction();
+
+    System.out.println("7");
+    System.out.println("8");
+    System.out.println("9");
+  }
+
+  public static void callingStaticFunction() {
+    System.out.println("4");
+    System.out.println("5");
+    System.out.println("6");
+  }
+}
+</div>
+
+In the example, code begins to execute in the "main" function and executes one instruction after another
+from the top-most instruction to the bottom-most instruction, but when it encounters the function
+call "callingStaticFunction" it immediately jumps to that function and executes the functions instructions
+in sequence from top to bottom. After the "System.out.println("6");" is executed the program flow
+jumps back to the function that called the returning function which in this case is "main". The
+next statement to be executed is "System.out.println("7");". When you run the application, the
+numbers are printed out in order from 1 to 9 per the description given above.
+</pre>
+</body>
+</html>

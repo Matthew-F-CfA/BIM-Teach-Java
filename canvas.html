@@ -1,0 +1,1086 @@
+<html>
+<head>
+<title>
+BIM Teach Java - java.awt.Canvas
+</title>
+</head>
+<body>
+<h2>java.awt.Canvas</h2>
+<pre>
+We covered some java.awt Components earlier in lesson 8. Now we will examine another java.awt Component
+called Canvas. java.awt.Canvas can be used to draw simple shapes and images on an otherwise blank Component
+canvas. We will utilize the MouseListener and MouseMotionListener interfaces from the java.awt.event package
+which allows us to handle events that involve mouse input.
+
+Lets start with a simple example where we make a java.awt.Canvas behave like a button by implementing the
+MouseListener and writing code in the "mouseClicked" function.
+
+Here is the <a href="CanvasButton.java">example</a>:
+<div style="background-color:lightgrey;">import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+
+class CanvasButton extends Frame {
+  CanvasButton refThis;
+
+  CanvasButtonCanvas canvasButtonCanvas=new CanvasButtonCanvas();
+
+  public static void main(String args[]) {
+    try {
+      CanvasButton cFrame=new CanvasButton();
+      Dimension dimScreen=Toolkit.getDefaultToolkit().getScreenSize();
+      cFrame.setSize(dimScreen.width, dimScreen.height-40);
+      cFrame.setVisible(true);
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  CanvasButton() {
+    super("Canvas Button");
+
+    refThis=this;
+
+    setIconImage(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB));
+    addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent we) {
+        System.exit(0);
+      }
+    });
+
+    add("Center", canvasButtonCanvas);
+    canvasButtonCanvas.addMouseListener(canvasButtonCanvas);
+  }
+
+  class CanvasButtonCanvas extends Canvas
+  implements MouseListener {
+
+    CanvasButtonCanvas() {
+      super();
+    }
+
+    public void mouseEntered(MouseEvent me) {
+    }
+
+    public void mouseExited(MouseEvent me) {
+    }
+
+    public void mousePressed(MouseEvent me) {
+    }
+
+    public void mouseReleased(MouseEvent me) {
+    }
+
+    public void mouseClicked(MouseEvent me) {
+      MessageDialog mDialog=new MessageDialog(refThis, "Mouse Clicked Dialog", "Mouse clicked inside the canvas.");
+      mDialog.show();
+    }
+
+    public void paint(Graphics graph) {
+      FontMetrics fMetr=graph.getFontMetrics();
+
+      int intLetterHeightDividedByTwo=fMetr.getHeight()/2;
+
+      int intStrWidthDividedByTwo=fMetr.stringWidth("Click Me")/2;
+
+      Dimension dimCanvas=getSize();
+
+      graph.drawString("Click Me", dimCanvas.width/2-intStrWidthDividedByTwo, dimCanvas.height/2+intLetterHeightDividedByTwo);
+    }
+  }
+
+  class MessageDialog extends Dialog
+  implements ActionListener {
+    Button btnOkay=new Button("Okay");
+
+    MessageDialog(Frame parent, String strTitle, String strMessage) {
+      super(parent, strTitle, true);
+
+      add("Center", new Label(strMessage));
+
+      add("South", btnOkay);
+      btnOkay.addActionListener(this);
+
+      Dimension screenDim=Toolkit.getDefaultToolkit().getScreenSize();
+      setLocation(screenDim.width/4, screenDim.height/4);
+      setSize(screenDim.width/2, screenDim.height/2);
+    }
+
+    public void actionPerformed(ActionEvent ae) {
+      Object evSource=ae.getSource();
+
+      if(evSource==btnOkay) {
+        dispose();
+      }
+    }
+  }
+}
+</div>
+
+In the above example a field named "refThis" is created for use within inner classes(where "this" references the inner class).
+The instruction that registers a listener for mouse events is "canvasButtonCanvas.addMouseListener(canvasButtonCanvas);".
+Once that instruction is processed any mouse events will be sent to the canvasButtonCanvas class to be operated on within
+the "mouseClicked" function of this example. The "mouseClicked" function contains two instructions, one for constructing
+a new dialog and the other for showing that dialog box. The "paint" function takes care of any drawing we want to do within
+the Canvas. We make use of the FontMetrics class for retrieving information about the pixel values related to drawing
+Strings with a Graphics object. In this case, we are positioning the text "Click Me" in the middle of the Canvas.
+
+
+Now that you have seen Canvas and MouseListener in action, we will re-visit an example of lesson 16 that made use of
+MultiplicationTable.java and TwoDimensionalKey.java . In this implementation we will use a java.awt.Canvas to display
+the multiplication table on a two dimensional grid.
+
+Here is the <a href="MultiplicationTableAWT.java">example</a>:
+<div style="background-color:lightgrey;">import java.util.TreeMap;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+
+class MultiplicationTableAWT extends Frame {
+  static TreeMap mapMultiplication=new TreeMap();
+
+  MultiplicationTableCanvas multiplicationCanvas=new MultiplicationTableCanvas();
+
+  static {
+    for(int i=0;i&lt;10;i++) {
+      for(int ia=0;ia&lt;10;ia++) {
+        mapMultiplication.put(new TwoDimensionalKey(i, ia), new Integer(i*ia));
+      }
+    }
+  }
+
+  public static void main(String args[]) {
+    try {
+      MultiplicationTableAWT mFrame=new MultiplicationTableAWT();
+      Dimension dimScreen=Toolkit.getDefaultToolkit().getScreenSize();
+      mFrame.setSize(dimScreen.width, dimScreen.height-40);
+      mFrame.setVisible(true);
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  MultiplicationTableAWT() {
+    super("Multiplication Table");
+
+    setIconImage(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB));
+    addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent we) {
+        System.exit(0);
+      }
+    });
+
+    add("Center", multiplicationCanvas);
+    multiplicationCanvas.addMouseListener(multiplicationCanvas);
+  }
+
+  class MultiplicationTableCanvas extends Canvas
+  implements MouseListener {
+    TreeMap mapShowProduct=new TreeMap(); //Keys are TwoDimensionalKey and Values are Boolean(if true then show the product otherwise if false show the multiplication expression.
+
+    MultiplicationTableCanvas() {
+      super();
+
+      for(int i=0;i&lt;10;i++) {
+        for(int ia=0;ia&lt;10;ia++) {
+          mapShowProduct.put(new TwoDimensionalKey(i, ia), new Boolean(false));
+        }
+      }
+    }
+
+    public void mouseEntered(MouseEvent me) {
+    }
+
+    public void mouseExited(MouseEvent me) {
+    }
+
+    public void mousePressed(MouseEvent me) {
+    }
+
+    public void mouseReleased(MouseEvent me) {
+    }
+
+    public void mouseClicked(MouseEvent me) {
+      Point mePoint=me.getPoint();
+      int meX=mePoint.x;
+      int meY=mePoint.y;
+
+      Dimension dimCanvasSize=getSize();
+
+      int intCanvasWidth=dimCanvasSize.width;
+      int intCanvasHeight=dimCanvasSize.height;
+
+      int intRectangleWidth=intCanvasWidth/10;
+      int intRectangleHeight=intCanvasHeight/10;
+
+      int intGridX=meX/intRectangleWidth;
+      int intGridY=meY/intRectangleHeight;
+
+      if(intGridX&gt;9)
+        return;
+
+      if(intGridY&gt;9)
+        return;
+
+      boolean blnShowProduct=((Boolean)mapShowProduct.get(new TwoDimensionalKey(intGridY, intGridX))).booleanValue();
+
+      blnShowProduct=!blnShowProduct; //if blnShowProduct was false it will now be true. if blnShowProduct was true it will now be false.
+
+      mapShowProduct.put(new TwoDimensionalKey(intGridY, intGridX), new Boolean(blnShowProduct));
+
+      repaint();
+    }
+
+    public void paint(Graphics graph) {
+      int intLetterHeight=graph.getFontMetrics().getHeight();
+
+      Dimension dimCanvasSize=getSize();
+
+      int intCanvasWidth=dimCanvasSize.width;
+      int intCanvasHeight=dimCanvasSize.height;
+
+      int intRectangleWidth=intCanvasWidth/10;
+      int intRectangleHeight=intCanvasHeight/10;
+
+      int intPositionX=0;
+      int intPositionY=0;
+
+      for(int i=0;i&lt;10;i++) {
+        intPositionX=0;
+        for(int ia=0;ia&lt;10;ia++) {
+          boolean blnShowProduct=((Boolean)mapShowProduct.get(new TwoDimensionalKey(i, ia))).booleanValue();
+
+          if(blnShowProduct) {
+            int intProduct=((Integer)mapMultiplication.get(new TwoDimensionalKey(i, ia))).intValue();
+
+            graph.drawString(String.valueOf(intProduct), intPositionX, intPositionY+intLetterHeight);
+          }
+          else {
+            String strExpression=String.valueOf(i)+" * "+String.valueOf(ia);
+
+            graph.drawString(strExpression, intPositionX, intPositionY+intLetterHeight);
+          }
+
+          intPositionX+=intRectangleWidth;
+        }
+        intPositionY+=intRectangleHeight;
+      }
+    }
+  }
+}
+</div>
+
+In the above example, scroll down to the constructor for MultiplicationTableAWT and notice that immediately
+after adding the MultiplicationTableCanvas "multiplicationCanvas" to the frame I added a MouseListener
+by using the "addMouseListener" function from the Canvas class that is being subclasses. Now, whenever
+the mouse enters, exits, is pressed, is released, or is clicked an event will be triggered which is
+sent to the MouseListener. Remember that the source file will only compile without errors if the
+class that is passed to "addMouseListener" actually does implement the MouseListener interface. For
+this example, we are only concerned with handling the mouse clicked event. Scroll down to the
+"mouseClicked" function in MultiplicationTableCanvas, that is where we place the code that is executed
+whenever a mouse click is generated by the user clicking on the Canvas. "meX" and "meY" are the ints
+representing the x and y location of the pixel that was clicked on inside the Canvas. "intGridX"
+and "intGridY" are the ints representing the x and y location of the box containing each table cell
+in the multiplication table. The "if" conditions are necessary because if the user clicks to close to
+the right edge or bottom edge of the canvas then a cell that isn't contained in our TreeMaps will
+be accessed, so "return" from the execution of the mouse clicked event if that happens. After
+setting the blnShowProduct and re-inserting it into "mapShowProduct" it is necessary to call
+the "repaint" method of Canvas to paint the Canvas with the new state of "mapShowProduct".
+
+Scroll down in MultiplicationTableCanvas to the function declaration of "paint". This is the
+most important function of the Canvas class because it is called whenever the Component is
+requested to repaint itself. Any functions you call on the java.awt.Graphics "graph" parameter
+will be reflected on the visible canvas on your computer screen. It is worthwhile to browse
+through the javadocs entry for java.awt.Graphics to learn about some of the functions included
+in that class.
+
+The first line in the "paint" method calls a function of FontMetrics called "getHeight" which
+returns the letter height of the current font being used with the Graphics object. This height
+is required because when using the Graphics object's "drawString" function the location on
+the screen where the String is drawn is where the programmer specifies as the 2nd and 3rd
+parameters of the "drawString" function with the lower left corner of the String oriented
+at the 2nd and 3rd parameters.
+
+Another important fact is that the coordinates specified with the Graphics object's draw functions
+are the pixel distances from the top left corner of the screen. Some locations on the screen are:
+<ul>
+<li>Top Left: (0, 0)</li>
+<li>Bottom Left: (0, getSize().height)</li>
+<li>Top Right:(getSize().width, 0)</li>
+<li>Bottom Right: (getSize().width, getSize().height)</li>
+<li>Middle: (getSize().width/2, getSize().height/2)</li>
+</ul>
+
+In the loops in the "paint" function, the position of each String is adjusted according to a 10x10
+grid and drawn with the String appearing at the top left corner of each table cell using the
+"drawString" function.
+
+
+So far we have only used "mouseClicked" from MouseListener. In the next example we will use both
+MouseListener and MouseMotionListener. MouseMotionListener has two functions which must be implemented
+they are "public void mouseMoved(MouseEvent me)" and "public void mouseDragged(MouseEvent me)".
+
+Here is the <a href="RelativeBounds.java">example</a>:
+<div style="background-color:lightgrey;">import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.util.Vector;
+
+class RelativeBounds extends Frame {
+  RelativeBounds refThis;
+
+  RelativeBoundsCanvas relativeBoundsCanvas=new RelativeBoundsCanvas();
+
+  public static void main(String args[]) {
+    try {
+      RelativeBounds rFrame=new RelativeBounds();
+      Dimension dimScreen=Toolkit.getDefaultToolkit().getScreenSize();
+      rFrame.setSize(dimScreen.width, dimScreen.height-40);
+      rFrame.setVisible(true);
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  RelativeBounds() {
+    super("Relative Bounds");
+
+    refThis=this;
+
+    setIconImage(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB));
+    addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent we) {
+        System.exit(0);
+      }
+    });
+
+    add("Center", relativeBoundsCanvas);
+    relativeBoundsCanvas.addMouseListener(relativeBoundsCanvas);
+    relativeBoundsCanvas.addMouseMotionListener(relativeBoundsCanvas);
+  }
+
+  class RelativeBoundsCanvas extends Canvas
+  implements MouseListener, MouseMotionListener {
+    Vector vecRectangles=new Vector();
+    boolean blnDragging=false;
+    int intCurrentX=-1; //The x pixel when mousePressed event is generated
+    int intCurrentY=-1; //The y pixel when mousePressed event is generated
+    int intCurrentX2=-1; //The x pixel when mouseDragged event is generated
+    int intCurrentY2=-1; //The y pixel when mouseDragged event is generated
+
+    RelativeBoundsCanvas() {
+      super();
+    }
+
+    public void mouseEntered(MouseEvent me) {
+    }
+
+    public void mouseExited(MouseEvent me) {
+    }
+
+    public void mousePressed(MouseEvent me) {
+      Point mePoint=me.getPoint();
+
+      int intMods=me.getModifiersEx();
+      intMods=intMods & MouseEvent.BUTTON3_DOWN_MASK;
+      if(intMods==MouseEvent.BUTTON3_DOWN_MASK) {
+//If the mouse button being pressed is the right mouse button then return because only a left mouse button drag should create a rectangle
+        int meX=mePoint.x;
+        int meY=mePoint.y;
+
+        for(int i=0;i&lt;vecRectangles.size();i++) {
+          Rectangle nextRectangle=(Rectangle)vecRectangles.elementAt(i);
+
+          if(nextRectangle.contains(meX, meY)) {
+            MessageDialog mDialog=new MessageDialog(refThis, "Rectangle Information Dialog", "("+nextRectangle.getX()+", "+nextRectangle.getY()+", "+nextRectangle.getWidth()+", "+nextRectangle.getHeight()+")");
+            mDialog.show();
+
+            break;
+          }
+        }
+
+
+        return;
+      }
+
+      intCurrentX=mePoint.x;
+      intCurrentY=mePoint.y;
+      intCurrentX2=intCurrentX;
+      intCurrentY2=intCurrentY;
+      blnDragging=true;
+    }
+
+    public void mouseReleased(MouseEvent me) {
+      if(!blnDragging) {
+//If not blnDragging then return because the mousePressed event was as a result of a right mouse button click
+        return;
+      }
+
+      Point mePoint=me.getPoint();
+      int meX=mePoint.x;
+      int meY=mePoint.y;
+
+      int intNewRectangleX=-1;
+      int intNewRectangleWidth=-1;
+      int intNewRectangleY=-1;
+      int intNewRectangleHeight=-1;
+
+      if(meX&lt;intCurrentX) {
+        intNewRectangleX=meX;
+        intNewRectangleWidth=intCurrentX-meX;
+      }
+      else {
+        intNewRectangleX=intCurrentX;
+        intNewRectangleWidth=meX-intCurrentX;
+      }
+
+      if(meY&lt;intCurrentY) {
+        intNewRectangleY=meY;
+        intNewRectangleHeight=intCurrentY-meY;
+      }
+      else {
+        intNewRectangleY=intCurrentY;
+        intNewRectangleHeight=meY-intCurrentY;
+      }
+
+      Rectangle rectangle=new Rectangle(intNewRectangleX, intNewRectangleY, intNewRectangleWidth, intNewRectangleHeight);
+
+      vecRectangles.addElement(rectangle);
+
+      blnDragging=false;
+
+      repaint();
+    }
+
+    public void mouseClicked(MouseEvent me) {
+    }
+
+    public void mouseMoved(MouseEvent me) {
+    }
+
+    public void mouseDragged(MouseEvent me) {
+      if(!blnDragging) {
+//If not blnDragging then return because the mousePressed event was as a result of a right mouse button click
+        return;
+      }
+
+      Point mePoint=me.getPoint();
+      intCurrentX2=mePoint.x;
+      intCurrentY2=mePoint.y;
+
+      repaint();
+    }
+
+    public void paint(Graphics graph) {
+      Color clrPrev=graph.getColor();
+
+      graph.setColor(Color.red);
+
+      for(int i=0;i&lt;vecRectangles.size();i++) { 
+        Rectangle nextRectangle=(Rectangle)vecRectangles.elementAt(i);
+
+        int intNextX=(int)nextRectangle.getX();
+        int intNextY=(int)nextRectangle.getY();
+        int intNextWidth=(int)nextRectangle.getWidth();
+        int intNextHeight=(int)nextRectangle.getHeight();
+
+        graph.drawRect(intNextX, intNextY, intNextWidth, intNextHeight);
+      }
+
+      graph.setColor(Color.green);
+
+      if(blnDragging) {
+        int intNewRectangleX=-1;
+        int intNewRectangleWidth=-1;
+        int intNewRectangleY=-1;
+        int intNewRectangleHeight=-1;
+
+        if(intCurrentX2&lt;intCurrentX) {
+          intNewRectangleX=intCurrentX2;
+          intNewRectangleWidth=intCurrentX-intCurrentX2;
+        }
+        else {
+          intNewRectangleX=intCurrentX;
+          intNewRectangleWidth=intCurrentX2-intCurrentX;
+        }
+
+        if(intCurrentY2&lt;intCurrentY) {
+          intNewRectangleY=intCurrentY2;
+          intNewRectangleHeight=intCurrentY-intCurrentY2;
+        }
+        else {
+          intNewRectangleY=intCurrentY;
+          intNewRectangleHeight=intCurrentY2-intCurrentY;
+        }
+
+        graph.drawRect(intNewRectangleX, intNewRectangleY, intNewRectangleWidth, intNewRectangleHeight);
+      }
+
+      graph.setColor(clrPrev);
+    }
+  }
+
+  class MessageDialog extends Dialog
+  implements ActionListener {
+    Button btnOkay=new Button("Okay");
+
+    MessageDialog(Frame parent, String strTitle, String strMessage) {
+      super(parent, strTitle, true);
+
+      add("Center", new Label(strMessage));
+
+      add("South", btnOkay);
+      btnOkay.addActionListener(this);
+
+      Dimension screenDim=Toolkit.getDefaultToolkit().getScreenSize();
+      setLocation(screenDim.width/4, screenDim.height/4);
+      setSize(screenDim.width/2, screenDim.height/2);
+    }
+
+    public void actionPerformed(ActionEvent ae) {
+      Object evSource=ae.getSource();
+
+      if(evSource==btnOkay) {
+        dispose();
+      }
+    }
+  }
+}
+</div>
+
+In the above example we make use of three mouse event handling functions: "mousePressed", "mouseReleased", "mouseDragged".
+"mousePressed" happens when a mouse button is pressed down. "mouseReleased" happens when a mouse button is released.
+"mouseDragged" happens when the mouse is moved and a mouse button is held down at the same time. It is possible to
+obtain information about a mouse click by using the MouseEvent's function "getModifiersEx". The information stored
+is in an int value, and can store the mouse button that was clicked and keyboard keys that were being pressed down
+at the time of the mouse press. In this example, we are only interested in finding out which mouse button was clicked.
+
+Take a look at this code snippet:
+<div style="background-color:lightgrey;">
+      int intMods=me.getModifiersEx();
+      intMods=intMods & MouseEvent.BUTTON3_DOWN_MASK;
+      if(intMods==MouseEvent.BUTTON3_DOWN_MASK) {
+//Write code in here that should be executed when the right mouse button is pressed.
+
+        return;
+      }
+</div>
+
+The code executes instructions related to a right mouse button press then returns before executing code outside of the
+conditional block.
+
+If the mouse press is a left button press then set the int fields to the mouse's x and y location pixel and setting
+blnDragging to true because we are now dragging a left mouse button press to create a rectangle.
+
+While the left mouse button is pressed and the mouse is dragged, the "mouseDragged" function is triggered and a couple
+of the ints for the "paint" function are set and "repaint" of Canvas is called.
+
+When the left mouse button press is released a new java.awt.Rectangle object is created and put into the "vecRectangles"
+Vector and "repaint" of Canvas is called.
+
+In "paint", the code executes a loop cycling through the elements of "vecRectangles" and drawing them on the screen.
+Lastly, in "paint" the rectangle that is currently being created by a drag operation is drawn(if a drag is currently
+ocurring).
+
+
+In the next example we will use a Thread object to draw a progress bar and text within a Canvas.
+
+Here is the <a href="ProgressBar.java">example</a>:
+<div style="background-color:lightgrey;">import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+
+class ProgressBar extends Frame {
+  volatile ProgressBarCanvas progressBarCanvas=new ProgressBarCanvas();
+  volatile ProgressBarThread progressBarThread=new ProgressBarThread();
+
+  public static void main(String args[]) {
+    try {
+      ProgressBar pFrame=new ProgressBar();
+      Dimension dimScreen=Toolkit.getDefaultToolkit().getScreenSize();
+      pFrame.setSize(dimScreen.width, dimScreen.height-40);
+      pFrame.setVisible(true);
+
+//By starting this thread after setVisible is called we are guaranteed that the Canvas will have dimensions.
+      pFrame.progressBarThread.start();
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  ProgressBar() {
+    super("Progress Bar");
+
+    setIconImage(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB));
+    addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent we) {
+        System.exit(0);
+      }
+    });
+
+    add("Center", progressBarCanvas);
+  }
+
+  class ProgressBarCanvas extends Canvas {
+    volatile double dblProgressBarPercent=0.0d;
+    volatile boolean blnDisplayText=true;
+
+    ProgressBarCanvas() {
+      super();
+    }
+
+//Each tick increments the progress bar by 10%.
+    public void tick() {
+      if(dblProgressBarPercent&gt;=0.95d && dblProgressBarPercent&lt;=1.05d) {
+        dblProgressBarPercent=0.0d;
+
+        blnDisplayText=!blnDisplayText;
+      }
+      else {
+        dblProgressBarPercent+=0.1d;
+      }
+
+      repaint();
+    }
+
+    public void paint(Graphics graph) {
+      Dimension dimCanvas=getSize();
+
+      if(blnDisplayText) {
+        Font fntObj=graph.getFont();
+        fntObj=fntObj.deriveFont(30.0f);
+        graph.setFont(fntObj);
+        FontMetrics fMetr=graph.getFontMetrics();
+        String strDisplay="Hello World";
+        int intStringWidth=fMetr.stringWidth(strDisplay);
+
+        graph.drawString(strDisplay, dimCanvas.width/2-intStringWidth/2, dimCanvas.height/4);
+      }
+
+      Color clrPrev=graph.getColor();
+
+      graph.setColor(Color.blue);
+
+      int intProgressBarWidth=dimCanvas.width/2;
+      double dblElapsed=((double)intProgressBarWidth)*dblProgressBarPercent;
+      int intElapsed=(int)Math.floor(dblElapsed);
+      int intProgressBarTranslateX=dimCanvas.width/4;
+
+//Draw the blue part of the progress bar
+      graph.fillRect(intProgressBarTranslateX, dimCanvas.height*3/4, intElapsed, 50);
+
+      graph.setColor(Color.gray);
+
+//Draw the gray part of the progress bar
+      graph.fillRect(intProgressBarTranslateX+intElapsed, dimCanvas.height*3/4, intProgressBarWidth-intElapsed, 50);
+
+      graph.setColor(clrPrev);
+    }
+  }
+
+  class ProgressBarThread extends Thread {
+    volatile boolean blnKeepAlive=true;
+
+    ProgressBarThread() {
+      super();
+    }
+
+    public void run() {
+      while(blnKeepAlive) {
+        try {
+          Thread.sleep(1000l);
+        }
+        catch(Exception ex) {
+        }
+
+        progressBarCanvas.tick();
+      }
+    }
+  }
+}
+</div>
+
+In the above example we declare a Canvas subclass called ProgressBarCanvas and a Thread subclass called
+ProgressBarThread. We wait until after the Canvas dimensions are initialized by the Frame's "setVisible" function
+then "start" the thread "progressBarThread". The Thread calls the "tick" function of ProgressBarCanvas
+to increment the percentage the progress bar has elapsed by 10%. When the progress bar has been incremented
+to approximately 100%(or 1.0d) we set the progress bar percentage back to 0%(or 0.0d) and repeat. Also,
+the blnDisplayText is toggled on/off whenever the percentage is approximately 100%.
+
+In the "paint" function of ProgressBarCanvas the Font classes "deriveFont" function is used to create
+a font with the parameter specified font size. Next, we get the FontMetrics for the new font and use
+it to get the width of the String "Hello World" using the "stringWidth" function. The code that displays
+the "Hello World" String is only executed if "blnDisplayText" is true.
+
+Lastly in the "paint" function, the progress bar is drawn by using the "fillRect" function which
+fills a rectangle with parameters x, y, width, height of the rectangle with the Graphics object's
+current color.
+
+The only instruction of interest in ProgressBarThread is the call to the "tick" function of
+ProgressBarCanvas. Notice how the fields declared in ProgressBar are accessable from anywhere
+in the class including inner classes.
+
+
+Here is an <a href="CanvasImage.java">example</a> with scaling an image to fit a Canvas:
+<div style="background-color:lightgrey;">import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.net.URL;
+import java.io.File;
+
+class CanvasImage extends Frame {
+  CanvasImage refThis;
+
+  CanvasImageCanvas canvasImageCanvas;
+
+  public static void main(String args[]) {
+    try {
+      if(args.length==0) {
+        System.out.println("Usage:");
+        System.out.println("  java CanvasImage &lt;image file name&gt;");
+
+        return;
+      }
+
+      CanvasImage cFrame=new CanvasImage(args[0]);
+      Dimension dimScreen=Toolkit.getDefaultToolkit().getScreenSize();
+      cFrame.setSize(dimScreen.width, dimScreen.height-40);
+      cFrame.setVisible(true);
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  CanvasImage(String strImageName) throws Exception {
+    super("Canvas Image");
+
+    refThis=this;
+
+    setIconImage(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB));
+    addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent we) {
+        System.exit(0);
+      }
+    });
+
+    String strUserDir=System.getProperty("user.dir");
+    String strFileSep=System.getProperty("file.separator");
+    if(!strUserDir.endsWith(strFileSep))
+      strUserDir=strUserDir+strFileSep;
+
+
+    String strRelativePathName=strUserDir+strImageName;
+    File fileImage=new File(strRelativePathName);
+    URL urlImage=fileImage.toURI().toURL();
+
+    BufferedImage imgBuffered=ImageIO.read(urlImage);
+    canvasImageCanvas=new CanvasImageCanvas(imgBuffered);
+    add("Center", canvasImageCanvas);
+  }
+
+  class CanvasImageCanvas extends Canvas {
+    BufferedImage imgBuffered;
+
+    CanvasImageCanvas(BufferedImage imgBuffered) {
+      super();
+
+      this.imgBuffered=imgBuffered;
+    }
+
+    public void paint(Graphics graph) {
+      Dimension dimCanvas=getSize();
+
+      double dblCanvasWidth=(double)dimCanvas.width;
+      double dblCanvasHeight=(double)dimCanvas.height;
+
+      double dblImageWidth=(double)imgBuffered.getWidth();
+      double dblImageHeight=(double)imgBuffered.getHeight();
+
+      Graphics2D graph2d=(Graphics2D)graph;
+
+      graph2d.scale(dblCanvasWidth/dblImageWidth, dblCanvasHeight/dblImageHeight);
+
+      graph2d.drawImage(imgBuffered, 0, 0, null);
+    }
+  }
+}
+</div>
+
+In the "main" function we obtain a command line argument that is the name of an image file(including
+file extension) that we want to display on the Canvas. That name is passed into CanvasImage's
+constructor and javax.imageio.ImageIO is used to read the image URL. Before we can make a call
+to "read" we need to construct a String to be used in the "toURL" function. First, we use
+the system property "user.dir" to return the absolute file path of where this command line
+console application is executing. Then, we use the system property "file.separator" to get
+the operating system platform dependent file separator. Next, we use String concatenation
+to initialize a String "strRelativePathName" that is the absolute file path to the image
+we want to use. Next, we construct a File object which we then use to call "toURL" to
+obtain the URL that is necessary in calling "read" of ImageIO. The BufferedImage returned
+is then passed into CanvasImageCanvas.
+
+Inside of CanvasImageCanvas scroll down to "paint". The dimensions for the Canvas and
+the image are assigned to double variables by class casting ints to doubles.
+The Graphics object is then casted to a "Graphics2D" object, so that we can access
+the "scale" function which takes two parameters that are each doubles. The scale
+factor width and the scale factor height. Suppose that the doubles passed into
+the "scale" function are 1.0d and 1.0d that would compute to no scaling; the
+image would be drawn with the same dimensions as it orignally had. Suppose that
+the doubles passed into the "scale" function are 2.0d and 2.0d that would compute
+to double the original size of the image. Suppose that the doubles passed into the
+"scale" function are 0.5d and 0.5d that would compute to half the original size
+of the image. The doubles that we pass in are the ratio of the canvas dimensions
+to the image dimensions. Which means that the image drawn will cover the entire
+Canvas.
+
+
+Here is an <a href="CanvasVector.java">example</a> with mathematical vectors:
+<div style="background-color:lightgrey;">import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+
+class CanvasVector extends Frame
+implements ActionListener {
+  TextField txtRadius=new TextField();
+  TextField txtTheta=new TextField();
+  Button btnDisplayVector=new Button("Display Vector");
+  CanvasVectorCanvas canvasVectorCanvas=new CanvasVectorCanvas();
+
+  public static void main(String args[]) {
+    try {
+      CanvasVector cFrame=new CanvasVector();
+      Dimension dimScreen=Toolkit.getDefaultToolkit().getScreenSize();
+      cFrame.setSize(dimScreen.width, dimScreen.height-40);
+      cFrame.setVisible(true);
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  CanvasVector() {
+    super("Canvas Vector");
+
+    setIconImage(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB));
+    addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent we) {
+        System.exit(0);
+      }
+    });
+
+    Panel tempPan=new Panel();
+    tempPan.setLayout(new GridLayout(3, 1));
+    Panel tempPanA=new Panel();
+    tempPanA.setLayout(new GridLayout(1, 2));
+    tempPanA.add(new Label("Radius:"));
+    tempPanA.add(txtRadius);
+    tempPan.add(tempPanA);
+    Panel tempPanB=new Panel();
+    tempPanB.setLayout(new GridLayout(1, 2));
+    tempPanB.add(new Label("Theta(in degrees):"));
+    tempPanB.add(txtTheta);
+    tempPan.add(tempPanB);
+    Panel tempPanC=new Panel();
+    tempPanC.add(btnDisplayVector);
+    btnDisplayVector.addActionListener(this);
+    tempPan.add(tempPanC);
+
+    add("North", tempPan);
+
+    add("Center", canvasVectorCanvas);
+  }
+
+  public void actionPerformed(ActionEvent ae) {
+    Object evSource=ae.getSource();
+
+    if(evSource==btnDisplayVector) {
+      String strRadius=txtRadius.getText();
+
+      if(strRadius.length()==0) {
+        txtRadius.setText("Radius required.");
+        try {
+          Thread.sleep(3000);
+        }
+        catch(Exception ex) {
+        }
+        txtRadius.setText("");
+
+        return;
+      }
+
+      double dblRadius=0.0d;
+      try {
+        dblRadius=Double.valueOf(strRadius).doubleValue();
+      }
+      catch(Exception ex) {
+        txtRadius.setText("Digits only.");
+        try {
+          Thread.sleep(3000);
+        }
+        catch(Exception ex2) {
+        }
+        txtRadius.setText(strRadius);
+
+        return;
+      }
+
+
+      String strTheta=txtTheta.getText();
+
+      if(strTheta.length()==0) {
+        txtTheta.setText("Theta required.");
+        try {
+          Thread.sleep(3000);
+        }
+        catch(Exception ex) {
+        }
+        txtTheta.setText("");
+
+        return;
+      }
+
+      double dblTheta=0.0d;
+      try {
+        dblTheta=Double.valueOf(strTheta).doubleValue();
+      }
+      catch(Exception ex) {
+        txtTheta.setText("Digits only.");
+        try {
+          Thread.sleep(3000);
+        }
+        catch(Exception ex2) {
+        }
+        txtTheta.setText(strTheta);
+
+        return;
+      }
+
+      canvasVectorCanvas.setVector(dblRadius, dblTheta);
+    }
+  }
+
+  class CanvasVectorCanvas extends Canvas {
+    double dblRadius=0.0d;
+    double dblTheta=0.0d;
+    int intX=-1;
+    int intY=-1;
+    boolean blnInitialized=false;
+
+    CanvasVectorCanvas() {
+      super();
+    }
+
+    public void setVector(double dblRadius, double dblTheta) {
+      dblTheta=dblTheta%360.0d;
+      double dblThetaRadians=0.0d;
+      double dblX=0.0d;
+      double dblY=0.0d;
+      if(dblTheta&gt;=0.0d && dblTheta&lt;=90.0d) {
+        dblThetaRadians=dblTheta*Math.PI/180.0d;
+
+        dblX=Math.cos(dblThetaRadians);
+        dblY=Math.sin(dblThetaRadians);
+      }
+      else if(dblTheta&gt;=90.0d && dblTheta&lt;=180.0d) {
+        dblTheta=180.0d-dblTheta;
+        
+        dblThetaRadians=dblTheta*Math.PI/180.0d;
+
+        dblX=-Math.cos(dblThetaRadians);
+        dblY=Math.sin(dblThetaRadians);
+      }
+      else if(dblTheta&gt;=180.0d && dblTheta&lt;=270.0d) {
+        dblTheta=dblTheta-180.0d;
+        
+        dblThetaRadians=dblTheta*Math.PI/180.0d;
+
+        dblX=-Math.cos(dblThetaRadians);
+        dblY=-Math.sin(dblThetaRadians);
+      }
+      else if(dblTheta&gt;=270.0d && dblTheta&lt;=360.0d) {
+        dblTheta=360.0d-dblTheta;
+        
+        dblThetaRadians=dblTheta*Math.PI/180.0d;
+
+        dblX=Math.cos(dblThetaRadians);
+        dblY=-Math.sin(dblThetaRadians);
+      }
+
+      dblX=dblX*dblRadius;
+      dblY=dblY*dblRadius;
+
+      dblY=-dblY;
+
+      intX=(int)Math.rint(dblX);
+      intY=(int)Math.rint(dblY);
+
+      Dimension dimCanvas=getSize();
+
+      int intMiddleX=dimCanvas.width/2;
+      int intMiddleY=dimCanvas.height/2;
+
+      intX+=intMiddleX;
+      intY+=intMiddleY;
+
+      blnInitialized=true;
+
+      repaint();
+    }
+
+    public void paint(Graphics graph) {
+      if(!blnInitialized)
+        return;
+
+      Dimension dimCanvas=getSize();
+
+      int intMiddleX=dimCanvas.width/2;
+      int intMiddleY=dimCanvas.height/2;
+
+      graph.drawLine(intMiddleX, intMiddleY, intX, intY);
+    }
+  }
+}
+</div>
+
+Scroll down to the "setVector" function of CanvasVectorCanvas which is called by "actionPerformed"
+in CanvasVector after collecting the radius and theta data from the user. The modulus operator "%"
+is used to make dblTheta be between the values of 0.0 and 360.0 .
+
+Next, we use "if" and "else if" conditions to determine which quadrant theta is in. In this example,
+theta supplied by the user is specified in degrees not radians, so after we get the reference angle
+for theta we convert theta into radians for use with the Java Math static functions which require
+radian values. Also, in the conditional code blocks we determine whether the x and y values
+are positive or negative(1st quadrant: x positive, y positive; 2nd quadrant: x negative, y positive;
+3rd quadrant: x negative, y negative; 4th quadrant: x positive, y negative).
+
+Directly after the conditional code, we multiply the x and y values by radius because vector
+coordinates are defined as: x=radius*cos and y=radius*sin.
+
+Next, we reverse the sign of dblY because in Java Graphics objects the value of y increases as
+the point goes lower on the screen and y decreases as the point goes higher on the screen.
+
+The CanvasVectorCanvas ints "intX" and "intY" are set to the rounded versions of "dblX" and "dblY".
+
+The middle of the Canvas is obtained using "getSize", which returns a Dimension, and dividing
+it in half and storing it in "intMiddleX" and "intMiddleY". Next, the "intX" and "intY" are
+translated by "intMiddleX" and "intMiddleY" respectively.
+
+The Canvas is assigned initialization by setting the "blnInitialized" boolean to true and
+the "repaint" function is called to trigger the "paint" function to execute.
+
+
+In this lesson, you learned how to implement a subclass of Canvas to display custom drawings
+within a windowed setting using the "paint" function. You utilized both MouseListener and
+MouseMotionListener to handle interaction with the user. You also practiced briefly with
+displaying animated content by using a Thread in conjunction with a Canvas. You used
+System.getProperty to manage file paths and implemented Graphics2D scaling to draw
+an Image on a Canvas. Lastly, you used the Math static functions "sin" and "cos" to
+draw a vector on a Canvas.
+</pre>
+</body>
+</html>

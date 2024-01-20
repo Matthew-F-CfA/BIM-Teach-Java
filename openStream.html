@@ -1,0 +1,115 @@
+<html>
+<head>
+<title>
+BIM Teach Java - URL openStream Function
+</title>
+</head>
+<body>
+<h2>URL openStream Function</h2>
+<pre>
+Up to now we have been content to process input located on the local computer. In this lesson,
+we will read a file from the Internet using the class java.net.URL and its "openStream" function.
+
+Here is the <a href="OpenStream.java">example</a>:
+<div style="background-color:lightgrey;">import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.net.URL;
+import java.io.*;
+
+class OpenStream extends Frame
+implements ActionListener {
+  TextField txtURL=new TextField();
+  Button btnOpenStream=new Button("Open Stream");
+  TextArea txtArea=new TextArea();
+
+  public static void main(String args[]) {
+    OpenStream oFrame=new OpenStream();
+    Dimension dimScreen=Toolkit.getDefaultToolkit().getScreenSize();
+    oFrame.setSize(dimScreen.width, dimScreen.height);
+    oFrame.setVisible(true);
+  }
+
+  OpenStream() {
+    super("Open Stream to Internet");
+
+    setIconImage(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB));
+    addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent we) {
+        System.exit(0);
+      }
+    });
+
+    Panel tempPan=new Panel();
+    tempPan.setLayout(new BorderLayout());
+    tempPan.add("West", new Label("URL:"));
+    tempPan.add("Center", txtURL);
+    tempPan.add("East", btnOpenStream);
+    btnOpenStream.addActionListener(this);
+ 
+    add("North", tempPan);
+
+    add("Center", txtArea);
+  }
+
+  public void actionPerformed(ActionEvent ae) {
+    Object evSource=ae.getSource();
+
+    if(evSource==btnOpenStream) {
+      String strURL=txtURL.getText();
+      if(strURL.length()==0) {
+        txtURL.setText("Enter URL here.");
+        try {
+          Thread.sleep(3000);
+        }
+        catch(Exception ex) {
+        }
+        txtURL.setText("");
+
+        return;
+      }
+
+      txtArea.setText("");
+
+      try {
+        URL url=new URL(strURL);
+
+        BufferedReader br=new BufferedReader(new InputStreamReader(url.openStream()));
+        String strNextLine="";
+        while((strNextLine=br.readLine())!=null) {
+          txtArea.append(strNextLine+"\n");
+        }
+        br.close();
+      }
+      catch(Exception ex) {
+        StackTraceElement ste[]=ex.getStackTrace();
+        for(int i=0;i&lt;ste.length;i++) {
+          txtArea.append(ste[i].toString()+"\n");
+        }
+      }
+    }
+  }
+}
+</div>
+
+The above example reads the contents of a html file on the Internet. Try typing in
+"http://bimopensource.freewebspace.com/CenterFrame.html" in the text field with the label "URL:"
+then pressing the "Open Stream" button. The contents of the file are displayed in the
+textarea called "txtArea".
+
+In the "actionPerformed" function of OpenStream the URL is obtained by getting the text
+from txtURL and checking to make sure that the user actually typed in the URL. Once,
+a URL is typed in and the button "Open Stream" is clicked the "openStream" function,
+which returns a java.io.InputStream, is called and passed into a InputStreamReader which
+is then passed into a BufferedReader. Each line in the file is read by using the
+BufferedReader's "readLine" function until a null String is returned.
+
+If a String that isn't compatible with the URL object's constructor is passed to the
+constructor then an Exception is thrown and the stack trace is printed out to the
+textarea "txtArea".
+
+In this lesson, you learned how to use "openStream" of the URL class to read in
+a html file from the Internet and display its contents in a TextArea.
+</pre>
+</body>
+</html>

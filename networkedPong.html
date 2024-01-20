@@ -1,0 +1,71 @@
+<html>
+<head>
+<title>
+BIM Teach Java - Networked Pong
+</title>
+</head>
+<body>
+<h2>Networked Pong</h2>
+<pre>
+For this lesson I have provided a PongClient and a PongServer where users can log in and play
+against another user. The user specifies the Internet address of the server he/she wants to
+connect to and then selects a user to play against who is in a waiting queue.
+
+Here is the <a href="PongServer.java">server</a>
+
+Here is the <a href="PongClient.java">client</a>
+
+Here is the <a href="PongConstants.java">constants</a> required in both the server and client
+
+I have included Java comments in the server and client for guiding you in what the code is doing.
+
+I just want to comment real quick on modifying the java.awt.Components that are added to the
+displayed java.awt.Frame . Whenever a component is added or removed from a displayed Frame the
+following code must be executed on the displayed Frame:
+<div style="background-color:lightgrey;">invalidate();
+validate();
+repaint();
+</div>
+You will see the validation process in several locations in the client when different java.awt.Panels
+are removed and added to the displayed Frame.
+
+When I executed the server and client applications I used the following commands:
+
+java PongServer 25432 800 400 11 11 20 80 20
+
+and
+
+java PongClient
+
+then in the displayed Frame:
+
+User Name: Matthew
+Server Address: 127.0.0.1
+Server Port: 25432
+
+The server address 127.0.0.1 corresponds to the local host which is the computer that the Java virtual machine
+is executing on.
+
+then execute the client again by using another command prompt console:
+
+java PongClient
+
+then in the displayed Frame:
+
+User Name: John
+Server Address: 127.0.0.1
+Server Port: 25432
+
+Next choose either of the client frames and challenge the user from the list. If you switch back
+and forth between the displayed frames you will notice that each of the users can see the pong
+game in action.
+
+After the game is over you can click on "Join Queue" to rejoin the list of challengeable users.
+
+In this lesson, you learned how to create server and client threads with ServerSockets on both
+the client and server for handling blocking input stream reading. You learned how to send
+initialization data when a socket is first opened and how to close sockets if an exception
+occurs.
+</pre>
+</body>
+</html>

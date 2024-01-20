@@ -1,0 +1,125 @@
+<html>
+<head>
+<title>
+BIM Teach Java - User Defined Types
+</title>
+</head>
+<body>
+<h2>User Defined Types</h2>
+<pre>
+The following <a href="BankClient.java">example</a> contains the code for a BankClient:
+<div style="background-color:lightgrey;">class BankClient {
+  static double MAX_BALANCE=200000.0d;
+
+  private String strName;
+  private String strSocialSecurityNumber;
+  private double dblBankBalance=0.0d;
+
+  public static void main(String args[]) {
+    if(args.length==0) {
+      System.out.println("Usage:");
+      System.out.println("  java BankClient <client name> <client social security number> <bank balance>");
+
+      return;
+    }
+
+    String strName=args[0];
+    String strSocialSecurityNumber=args[1];
+    double dblBankBalance=Double.valueOf(args[2]).doubleValue();
+
+    BankClient udtBankClient=new BankClient(strName, strSocialSecurityNumber, dblBankBalance);
+
+    System.out.println(udtBankClient.getName());
+    System.out.println(udtBankClient.getSocialSecurityNumber());
+    System.out.println(udtBankClient.getBankBalance());
+  }
+
+  BankClient(String strName, String strSocialSecurityNumber, double dblBankBalance) {
+    this.strName=strName;
+    this.strSocialSecurityNumber=strSocialSecurityNumber;
+    this.dblBankBalance=dblBankBalance;
+  }
+
+  public String getName() {
+    return strName;
+  }
+
+  public void setName(String strName) {
+    this.strName=strName;
+  }
+
+  public String getSocialSecurityNumber() {
+    return strSocialSecurityNumber;
+  }
+
+  public void setSocialSecurityNumber(String strSocialSecurityNumber) {
+    this.strSocialSecurityNumber=strSocialSecurityNumber;
+  }
+
+  public double getBankBalance() {
+    return dblBankBalance;
+  }
+
+  public void setBankBalance(double dblBankBalance) {
+    this.dblBankBalance=dblBankBalance;
+  }
+}
+</div>
+
+The BankClient class defines some basic functionality for a bank client. It declares fields
+for the name, social security, and bank balance for each bank client. It also declares a
+static field that can be used to store information that doesn't change from client to client.
+
+The first field is MAX_BALANCE. It is a static field which means that it is the same for all clients.
+The MAX_BALANCE field has a data type of double, and it is initialized to 200,000 units which is
+the max balance that any bank client can have.
+
+The next three fields are for storing the name, social security number, and bank balance of a
+particular bank client. These three fields can be referred to as instance variables because they
+can store different information for each instance of the BankClient class.
+
+Next, you see the function "main" that has already been explained in previous lessons. The one difference
+is that a new keyword has been introduced and it is "new". The "new" keyword tells the Java runtime environment
+that a new object is being instantiated. In this example, the new object is assigned to the variable
+"udtBankClient" of type BankClient.
+
+Next(after the end of the function "main"), a constructor is declared. You can identify a constructor because
+there is no return type specified on the same line and the name of the would be function is the same name
+as the class name.
+
+The signature of the constructor contains three parameters, one for each of the classes instance fields. However,
+the constructor doesn't necessarily have to contain the same number of parameters as there are instance fields.
+We could have specified only the name and social security number, but left out the bank balance in which case
+the bank balance would remain 0.0 which it was initialized to at its declaration time.
+
+Whenever a new object of type BankClient is created the parameters for the constructor must be set,
+so that the accessor functions that appear later on in the class definition can be accessed.
+
+Inside the constructor, notice the keyword "this". The "this" keyword tells the compiler that there is
+an instance field inside "this" class with the same name that follows "this.". In our example, we are
+setting the instance fields values to the local fields values contained in the parameters passed into
+the constructor.
+
+After the constructor is closed with the curly brace "}", there are a number of functions called
+accessor and mutator functions. Accessor functions typically start with "get" and mutator functions
+typically start with "set".
+
+Each function starts with an access modifier which in our case is "public" for all six of the functions
+which means that any class from any package(I will cover packages soon) can use the function. The public
+modifier is necessary because our instance fields are declared "private" which means they can only be
+accessed by the class which declared them.
+
+Next, following the access modifier, is the return type of the function. Whenever a function is done
+executing its instructions it must return a value unless its return type is void, in which case, no
+return value is required. The "getName" function has a return type of String. The "getSocialSecurityNumber"
+function has a return type of String. The "getBankBalance" function has a return type of double.
+Notice how each function returns an instance field with a data type that matches the return type.
+
+Now that you know what an accessor function is, take a quick look back at the code inside the "main"
+function. Notice how after the "udtBankClient" field is instantiated with a BankClient object there
+are a few System.out.println function calls. Each of the "println" function calls takes a parameter
+that is the object or primitive to print to the console. In this case, each call the "println" prints
+out, in order, a String, a String, and a double by using the accessor functions declared in BankClient. 
+</pre>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<html>
+<head>
+<title>
+BIM Teach Java - Output for Printing
+</title>
+</head>
+<body>
+<h2>Output for Printing</h2>
+<pre>
+Java does provide printing using PrinterJob objects, but I am going to show you another option for printing
+and viewing output using HTML formated files. If the end goal is to generate a printout then use File->Print
+through the Internet browser's menu options.
+
+In the following example we will create a HTML table containing information created and stored in a Java
+runtime environment.
+
+Here is the <a href="HTMLTableOutput.java">example</a>:
+<div style="background-color:lightgrey;">import java.io.*;
+import java.util.Vector;
+
+class HTMLTableOutput {
+
+  public static void main(String args[]) {
+    try {
+      HTMLTableOutput hTO=new HTMLTableOutput();
+
+      HTMLTableOutput.ContactPerson cpObj=hTO.new ContactPerson("John", "012-345-6789", "john@fiction.org");
+      HTMLTableOutput.ContactPerson cpObj2=hTO.new ContactPerson("Joe", "987-654-3210", "joe@fiction.org");
+      HTMLTableOutput.ContactPerson cpObj3=hTO.new ContactPerson("Mary", "121-212-1212", "mary@fiction.org");
+
+      Vector vecContacts=new Vector();
+
+      vecContacts.addElement(cpObj);
+      vecContacts.addElement(cpObj2);
+      vecContacts.addElement(cpObj3);
+
+
+      File newFile=null;
+
+      int intCountFile=0;
+
+//This loop makes sure that we don't overwrite an existing file.
+      while(true) {
+        newFile=new File("HTMLTableOutput"+intCountFile+".html");
+        if(newFile.exists()) {
+          ++intCountFile;
+          continue;
+        }
+
+        break;
+      }
+
+
+      RandomAccessFile raf=new RandomAccessFile(newFile, "rw");
+
+      raf.writeBytes("&lt;html&gt;");
+      raf.write(13);
+      raf.write(10);
+      raf.writeBytes("&lt;body&gt;");
+      raf.write(13);
+      raf.write(10);
+
+//Make the table have 3 columns and width be half the window size
+      raf.writeBytes("&lt;table cols='3' border='1' width='50%'&gt;");
+      raf.write(13);
+      raf.write(10);
+
+
+//Set the first column's width to 40% of the table width
+      raf.writeBytes("&lt;col style='width:40%'&gt;");
+      raf.write(13);
+      raf.write(10);
+
+//Set the second column's width to 30% of the table width
+      raf.writeBytes("&lt;col style='width:30%'&gt;");
+      raf.write(13);
+      raf.write(10);
+
+//Set the third column's width to 30% of the table width
+      raf.writeBytes("&lt;col style='width:30%'&gt;");
+      raf.write(13);
+      raf.write(10);
+
+
+//Output the table headers for each column
+      raf.writeBytes("&lt;tr&gt;&lt;th&gt;Name&lt;/th&gt;&lt;th&gt;Phone&lt;/th&gt;&lt;th&gt;Email&lt;/th&gt;&lt;/tr&gt;");
+      raf.write(13);
+      raf.write(10);
+
+      for(int i=0;i&lt;vecContacts.size();i++) {
+        HTMLTableOutput.ContactPerson nextContact=(HTMLTableOutput.ContactPerson)vecContacts.elementAt(i);
+
+        raf.writeBytes("&lt;tr&gt;");
+
+//Output the data for the first cell
+        raf.writeBytes("&lt;td&gt;");
+        raf.writeBytes(nextContact.getName());
+        raf.writeBytes("&lt;/td&gt;");
+
+//Output the data for the second cell
+        raf.writeBytes("&lt;td&gt;");
+        raf.writeBytes(nextContact.getPhone());
+        raf.writeBytes("&lt;/td&gt;");
+
+//Output the data for the third cell
+        raf.writeBytes("&lt;td&gt;");
+        raf.writeBytes(nextContact.getEmail());
+        raf.writeBytes("&lt;/td&gt;");
+
+        raf.writeBytes("&lt;/tr&gt;");
+
+        raf.write(13);
+        raf.write(10);
+      }
+
+      raf.writeBytes("&lt;/table&gt;");
+      raf.write(13);
+      raf.write(10);
+
+      raf.writeBytes("&lt;/body&gt;");
+      raf.write(13);
+      raf.write(10);
+      raf.writeBytes("&lt;/html&gt;");
+      raf.write(13);
+      raf.write(10);
+
+      raf.close();
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  class ContactPerson {
+    String strName;
+    String strPhone;
+    String strEmail;
+
+    ContactPerson(String strName, String strPhone, String strEmail) {
+      this.strName=strName;
+      this.strPhone=strPhone;
+      this.strEmail=strEmail;
+    }
+
+    public String getName() {
+      return strName;
+    }
+
+    public String getPhone() {
+      return strPhone;
+    }
+
+    public String getEmail() {
+      return strEmail;
+    }
+  }
+}
+</div>
+
+After compiling and running the above source file there will be a file called "HTMLTableOutput<number>.html" file.
+Double click on the file to view the html file in your Internet browser. If you want to you can try printing
+the file using the menu bar's File->Print option. The most important part of the html file is where the
+table is constructed. In your situation, you will need to modify the number of columns in the table, the border
+of the table, and the width of the table. Also, adjust the number of "th"s and "td"s to match your printing preferences.
+
+The HTML language has many useful layout features that can aid in your printing situation, but it is beyond the
+scope of these lessons to cover the full HTML language. However, there are plenty of informative HTML tutorials
+on the Internet should you choose to explore the HTML language in farther depth.
+
+In this lesson, you learned how to use RandomAccessFile to write out HTML format Strings to create a presentable
+file for viewing data or printing data.
+</pre>
+</body>
+</html>

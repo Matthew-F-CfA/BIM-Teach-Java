@@ -1,0 +1,147 @@
+<html>
+<head>
+<title>
+BIM Teach Java - Synchronization
+</title>
+</head>
+<body>
+<h2>Synchronization</h2>
+<pre>
+Whenever using multi-threading in applications you must use synchronization to ensure that data isn't corrupted.
+Most commonly, data can be corrupted when counting or accumulating data in primitive data types.
+
+Here is an <a href="WithoutSynchronization.java">example</a>:
+<div style="background-color:lightgrey;">class WithoutSynchronization {
+  volatile int intCount=0;
+
+  public static void main(String args[]) {
+    try {
+      WithoutSynchronization without=new WithoutSynchronization();
+
+      WithoutSynchronization.WorkerThread thrWorker=without.new WorkerThread();
+      WithoutSynchronization.WorkerThread thrWorker2=without.new WorkerThread();
+
+      thrWorker.start();
+      thrWorker2.start();
+
+      thrWorker.join();
+      thrWorker2.join();
+
+      System.out.println("intCount: "+without.intCount);
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  class WorkerThread extends Thread {
+
+    WorkerThread() {
+      super();
+    }
+
+    public void run() {
+      for(int i=0;i&lt;1000;i++) {
+        intCount=intCount+1;
+      }
+    }
+  }
+}
+</div>
+
+The "intCount" field is declared with a modifier of "volatile" because it will be accessed and mutated from
+multiple threads.
+
+In the "main" function we instantiate some Objects including a couple of WorkerThreads which are executable
+Threads because when we declare the class WorkerThread we make it extend Thread. Whenever a class is created
+as a Thread it must implement the "run" function because the code in "run" will be the code that is
+executed when the Thread is started using the "start" function of Thread.
+
+Next, in the "main" function after the two Threads are started we call the "join" function of each Thread
+to make the function "main" block execution until the code in each of the Threads is done executing.
+
+Lastly, in the "main" function "println" is called to print out the value of "intCount". If data isn't
+corrupted then the value in "intCount" should always be "2000" because inside each Threads "run" function
+the code increments, or counts up by 1, a total of "1000" times for each Thread.
+
+Try running the program "java WithoutSynchronization" 10 times and you should notice that at least a
+few of the times the value in "intCount" after the Threads have executed isn't the "2000" that is should be.
+
+So now that we have proven that without synchronization a logic error has corrupted a counter, we will
+look at a rewritten version of the same application that makes use of synchronization to ensure data
+consistency throughout multi-threaded access.
+
+Here is the <a href="WithSynchronization.java">example</a>:
+<div style="background-color:lightgrey;">class WithSynchronization {
+  volatile int intCount=0;
+
+  static volatile Object syncObj=new Object();
+
+  public static void main(String args[]) {
+    try {
+      WithSynchronization with=new WithSynchronization();
+
+      WithSynchronization.WorkerThread thrWorker=with.new WorkerThread();
+      WithSynchronization.WorkerThread thrWorker2=with.new WorkerThread();
+
+      thrWorker.start();
+      thrWorker2.start();
+
+      thrWorker.join();
+      thrWorker2.join();
+
+      System.out.println("intCount: "+with.intCount);
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  class WorkerThread extends Thread {
+
+    WorkerThread() {
+      super();
+    }
+
+    public void run() {
+      for(int i=0;i&lt;1000;i++) {
+
+synchronized(WithSynchronization.syncObj) {
+
+        intCount=intCount+1;
+
+}
+
+      }
+    }
+  }
+}
+</div>
+
+The only differences between the application WithSynchronization and WithoutSynchronization is the new
+static, volatile variable in WithSynchronization and inside the WorkerThread's "run" method the use
+of the "synchronized" keyword to create a synchronization block of code with the mutex "syncObj".
+The code inside of the "synchronized" block will only execute if a single thread has access of
+the mutex "syncObj", so only workerThr or workerThr2 can have exclusive access to the code inside
+of that synchronization block at any one time.
+
+Now when executing the application "java WithSynchronization", every single time the value in "intCount"
+will be "2000" after the Threads execute as it should be.
+
+One more thing about synchronization, it is tempting to write applications with more than one mutex
+with each mutex corresponding to a different synchronization block, but I highly recommend avoiding
+that practice at least until you are more familiar with synchronization. I recommend using a single
+static mutex for every place where synchronization needs to be implemented. The reason I recommend
+such a practice is because of the possibility of deadlock. Deadlock occurs when one Thread owns
+the mutex that another different Thread is waiting to synchronize while the second Thread owns
+a different mutex that the first Thread is waiting to synchronization. Essentially, neither Thread
+ever gains access to the mutex they need and the program haults indefinitely.
+
+While learning the Java language, I recommend that if you are writing a multi-threaded program
+then you should make all of your fields volatile to avoid a tedious debugging process.
+
+In this lesson, you learned about the use of volatile, how to create and start Threads, and
+what a "synchronized" block looks like and how it controls program flow and protects data consistency.
+</pre>
+</body>
+</html>

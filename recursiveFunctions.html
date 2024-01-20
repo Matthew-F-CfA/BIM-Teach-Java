@@ -1,0 +1,108 @@
+<html>
+<head>
+<title>
+BIM Teach Java - Recursive Functions and Returning Values from Parameters
+</title>
+</head>
+<body>
+<h2>Recursive Functions and Returning Values from Parameters</h2>
+<pre>
+In the next example we will be making recursive function calls which means the function
+will call itself inside its own function. Also, we will be using a java.util.Vector to
+return values from our function call. Recursion and returning by parameter doesn't
+always occur together, but in the next example it is practical to do so. In this example
+we will be using the Fibonacci number sequence which is a sequence that expands by
+adding the final two numbers in the sequence to create a sum which is the next number
+in the sequence. Here are the first several numbers in the Fibonacci sequence:
+1, 1, 2, 3, 5, 8, 13, 21, etc.
+
+Here is the <a href="RecursiveFibonacci.java">example</a>:
+<div style="background-color:lightgrey;">import java.io.*;
+import java.util.Vector;
+
+class RecursiveFibonacci {
+
+  public static void main(String args[]) {
+    try {
+      Vector vecFibonacci=new Vector();
+//Required for initializing the sequence with the first two indices that will be used for adding the numbers
+      vecFibonacci.addElement(new Integer(1));
+      vecFibonacci.addElement(new Integer(1));
+
+      BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
+
+      while(true) {
+        System.out.println("Type in \"1\" if you want to find the nth Fibonacci number or type in \"2\" if you want to exit.\n");
+
+        String strRequest=br.readLine();
+
+        if(strRequest.equals("2"))
+          break;
+
+        System.out.println("");
+
+        System.out.println("What index(starting with 1) of Fibonacci number do you want to return?\n");
+
+        String strIndex=br.readLine();
+
+        int intIndex=-1;
+        try {
+          intIndex=Integer.parseInt(strIndex);
+        }
+        catch(Exception ex) {
+          continue;
+        }
+
+        if(intIndex&lt;1)
+          continue;
+
+        System.out.println("");
+
+        if(intIndex&lt;=vecFibonacci.size()) {
+          System.out.println("The "+String.valueOf(intIndex)+"th Fibonacci number is "+String.valueOf(vecFibonacci.elementAt(intIndex-1))+"\n");
+        }
+        else {
+          int intIndicesLeftToCompute=intIndex-vecFibonacci.size();
+
+          computeFibonacci(intIndicesLeftToCompute, vecFibonacci);
+
+          System.out.println("The "+String.valueOf(intIndex)+"th Fibonacci number is "+String.valueOf(vecFibonacci.elementAt(vecFibonacci.size()-1))+"\n");
+        }
+      }
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  public static void computeFibonacci(int intIndicesLeftToCompute, Vector vecFibonacci) {
+    int intOne=((Integer)vecFibonacci.elementAt(vecFibonacci.size()-2)).intValue();
+    int intTwo=((Integer)vecFibonacci.elementAt(vecFibonacci.size()-1)).intValue();
+
+    vecFibonacci.addElement(new Integer(intOne+intTwo));
+
+    --intIndicesLeftToCompute;
+
+    if(intIndicesLeftToCompute==0)
+      return;
+
+    computeFibonacci(intIndicesLeftToCompute, vecFibonacci);
+  }
+}
+</div>
+
+The recursive function is "computeFibonacci" which recursively calls itself until the int parameter
+"intIndicesLeftToCompute" reaches 0 then the function returns and the Vector "vecFibonacci" contains
+all the numbers in the sequence up to the nth index specified in the "main" function. "intOne" and
+"intTwo" are the next to last and the last elements in the sequence which are stored in the Vector.
+Their sum is the new final element in the sequence. The only reason why the Vector can be used
+to pass back values from the function is because it is a pointer to a Vector that was constructed
+in a calling function(in this case "main"). If you assign a different Object to a variable passed
+into a function then the calling function won't contain the correct reference to the Object.
+
+In this lesson, you learned about recursive functions and how to exit them by passing in a
+parameter that is used to terminate the recursion when it reaches a certain value. You
+also learned how to return values from a function by using a parameter.
+</pre>
+</body>
+</html>

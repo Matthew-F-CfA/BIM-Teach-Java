@@ -1,0 +1,165 @@
+<html>
+<head>
+<title>
+BIM Teach Java - Standard Input and Exceptions
+</title>
+</head>
+<body>
+<h2>Standard Input and Exceptions</h2>
+<pre>
+Up to this point we have only introduced you to command line arguments as a source of application input.
+In this lesson you will learn how to accept lines of input from the standard input stream.
+
+Here is the <a href="MathStandardInput.java">example</a>:
+<div style="background-color:lightgrey;">import java.io.*;
+
+class MathStandardInput {
+
+  public static void main(String args[]) {
+    try {
+      BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
+
+      String strNextOperation="";
+      String strOperand="";
+      String strOperand0="";
+
+      double dblOperand=0.0d;
+      double dblOperand0=0.0d;
+
+      double dblOperated=0.0d;
+
+      do {
+        System.out.println("Type in \"addition\" or \"subtraction\" or \"multiplication\" or \"division\" or \"remainder\" or \"exponent\" or \"exit\"\n");
+
+        strNextOperation=br.readLine();
+
+        if(strNextOperation.equals("exit"))
+          break;
+
+        System.out.println("Type in first operand");
+
+        strOperand=br.readLine();
+
+        System.out.println("Type in second operand");
+
+        strOperand0=br.readLine();
+
+        dblOperand=Double.valueOf(strOperand).doubleValue();
+        dblOperand0=Double.valueOf(strOperand0).doubleValue();
+
+        if(strNextOperation.equals("addition")) {
+          dblOperated=dblOperand+dblOperand0;
+        }
+        else if(strNextOperation.equals("subtraction")) {
+          dblOperated=dblOperand-dblOperand0;
+        }
+        else if(strNextOperation.equals("multiplication")) {
+          dblOperated=dblOperand*dblOperand0;
+        }
+        else if(strNextOperation.equals("division")) {
+          dblOperated=dblOperand/dblOperand0;
+        }
+        else if(strNextOperation.equals("remainder")) {
+          dblOperated=dblOperand%dblOperand0;
+        }
+        else if(strNextOperation.equals("exponent")) {
+          dblOperated=Math.pow(dblOperand, dblOperand0);
+        }
+        else {
+          System.out.println("\nUnrecognized operation.\n\n");
+          continue;
+        }
+
+        System.out.println("\nThe numbers computed to a result of "+dblOperated+"\n\n");
+
+      } while(true);
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+}
+</div>
+
+The first thing that must done is import the input/output libraries necessary for reading standard input.
+They are java.io.BufferedReader and java.io.InputStreamReader . Rather than typing in two import statements,
+we use "import java.io.*;" which imports all input/output classes.
+
+The first line that appears in the "main" function is "try {". "try" is a keyword that helps the programmer
+with exception handling. I will cover exception handling later in this lesson. For the purposes of this
+console application, "try" is necessary because the "readLine" function of BufferedReader throws an
+IOException .
+
+Next, we declare a BufferedReader variable and use the constructors for BufferedReader and InputStreamReader
+with the standard input stream "System.in". We can't simply use BufferedReader with "System.in" because
+the constructors for BufferedReader only accept a Reader object as a parameter, and System.in isn't a Reader,
+but InputStreamReader is a Reader.
+
+Next, the variables we use in the "do while loop" are declared. Notice that the keyword "do" is followed
+by a curly brace "{" which is done because everything in between the curly braces will be executed repeatedly
+until either the loop is broken using the "break" keyword or until the condition inside the "while" evaluates
+to false. So, the loop will execute every instruction in between the curly braces in sequence from top to
+bottom one after the other until it reaches the "while" keyword at which time the execution returns back
+to the instruction directly following the "do" keyword.
+
+The line containing "br.readLine()" is the first instruction where we receive user input. The "readLine"
+function is a blocking function which means that program execution halts until the "readLine" function
+returns. The "readLine" function will not return until the user presses the Enter key on his/her keyboard.
+The "println" function immediately preceding "readLine" tells the user the acceptable input text for
+the "readLine" function.
+
+If the user types in "exit" and presses the Enter key then the conditional if statement will make the
+program "break" the loop allowing the program to end its execution(just a quick comment about console
+applications, the user can terminate execution of any program at any time by using the keyboard keys
+Ctrl and c pressed at the same time).
+
+The rest of the application executes in a fashion similar to BuiltInMathOperators.java from Lesson 4.
+
+At the end of the "main" function notice that after the curly brace "}" for the "try" block there is
+a catch clause with a variable "Exception ex". "ex" is a variable that will contain exception info
+if an exception occurs within the "try" block. "ex" is most often used with its function "printStackTrace"
+which prints out a stack trace containing the classes, functions, and lines where the exception occured
+with the most recently entered function appearing first. You should attempt to cause an exception
+yourself by typing in "notanumber" where either the first operand or second operand is expected as
+user input. A NumberFormatException will be generated after both the operands are entered.
+Scan down the stack until you see MathStandardInput.main . That line is telling you where
+in your code the exception was generated: the "main" function in the source file MathStandardInput
+at line number 34. If you open up your MathStandardInput.java source file and scroll down to line 34
+you will find the instruction "dblOperand=Double.valueOf(strOperand).doubleValue();" in which a String
+is converted to a double. However, the String must be a digits only real number in order for the
+"valueOf" function to be able to read the String.
+
+As a programmer, it is your decision what to do with exceptions. Should the NumberFormatException force
+a program aborting operation? If you don't think it should then you could write another "try" block
+specifically for the "valueOf" functions.
+
+Replace the code:
+<div style="background-color:lightgrey;">        dblOperand=Double.valueOf(strOperand).doubleValue();
+        dblOperand0=Double.valueOf(strOperand0).doubleValue();
+</div>
+
+With:
+<div style="background-color:lightgrey;">        try {
+          dblOperand=Double.valueOf(strOperand).doubleValue();
+          dblOperand0=Double.valueOf(strOperand0).doubleValue();
+        }
+        catch(Exception ex) {
+          System.out.println("");
+          continue;
+        }
+</div>
+
+Now instead of exiting the loop due to the exception handling "try" block, if a NumberFormatException
+is generated then the output stream is advanced by a "println" new line and the loop is continued.
+The "continue" keyword tells program execution to immediately move to the first instruction at the
+top of the "do while loop".
+
+If you ever find yourself writing code and when you compile the source code you see an error that states:
+unreported exception Exception; must be caught or declared to be thrown. You now know that you must
+enclose the code in question with a "try catch" exception handling block.
+
+In this lesson you learned another method for receiving input in the form of standard input stream.
+You also learned about exception handling and controlling program flow.
+</pre>
+</body>
+</html>

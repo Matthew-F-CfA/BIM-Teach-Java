@@ -1,0 +1,515 @@
+<html>
+<head>
+<title>
+BIM Teach Java - Artificial Intelligence
+</title>
+</head>
+<body>
+<h2>Artificial Intelligence</h2>
+<pre>
+Artificial intelligence is when a computer program behaves like a human. In the following example,
+the computer program will simulate moving a slider in the classic game of Pong. The user will
+play opposite the AI by using the arrow keypad on his/her keyboard.
+
+Here is the <a href="PongExample.java">example</a>:
+<div style="background-color:lightgrey;">import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+
+class PongExample extends Frame
+implements ActionListener, KeyEventDispatcher {
+  volatile static Object syncAll=new Object();
+
+  volatile Button btnStart=new Button("Start Game");
+  volatile Button btnStop=new Button("Stop Game");
+
+  volatile PongCanvas canvasPong=new PongCanvas();
+
+  volatile BallMoveThread thrBall=new BallMoveThread();
+
+  volatile ArtificialIntelligenceThread thrAI=new ArtificialIntelligenceThread();
+
+  public static void main(String args[]) {
+    try {
+      PongExample pFrame=new PongExample();
+      Dimension dimScreen=Toolkit.getDefaultToolkit().getScreenSize();
+      pFrame.setSize(dimScreen.width, dimScreen.height-40);
+      pFrame.setVisible(true);
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  PongExample() {
+    super("Pong");
+
+    setIconImage(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB));
+    addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent we) {
+        System.exit(0);
+      }
+    });
+
+    KeyboardFocusManager manager=KeyboardFocusManager.getCurrentKeyboardFocusManager();
+    manager.addKeyEventDispatcher(this);
+
+    Panel tempPan=new Panel();
+    tempPan.add(btnStart);
+    btnStart.addActionListener(this);
+    tempPan.add(btnStop);
+    btnStop.addActionListener(this);
+
+    add("North", tempPan);
+
+    add("Center", canvasPong);
+
+    thrBall.start();
+
+    thrAI.start();
+  }
+
+  public void actionPerformed(ActionEvent ae) {
+    Object evSource=ae.getSource();
+
+    if(evSource==btnStart) {
+      canvasPong.startGame();
+    }
+    else if(evSource==btnStop) {
+      canvasPong.blnUserWins=true;
+
+      canvasPong.stopGame();
+
+      canvasPong.repaint();
+    }
+  }
+
+  public boolean dispatchKeyEvent(KeyEvent ke) {
+    Object evSource=ke.getSource();
+    if(evSource instanceof TextField)
+      return false;
+    else if(evSource instanceof TextArea)
+      return false;
+
+    if(ke.getID()==KeyEvent.KEY_PRESSED) {
+      int keyCode=ke.getKeyCode();
+
+      if(keyCode==KeyEvent.VK_UP) {
+        canvasPong.arrowUp();
+      }
+      else if(keyCode==KeyEvent.VK_DOWN) {
+        canvasPong.arrowDown();
+      }
+    }
+
+    return true;
+  }
+
+  class PongCanvas extends Canvas {
+    volatile int intSliderWidth=20;
+    volatile int intSliderHeight=150;
+
+    volatile int intUserSliderPosition=-1;
+    volatile int intAISliderPosition=-1;
+
+    volatile int intUserSliderPositionIncrement=10;
+
+    volatile int intBallWidth=11;
+    volatile int intBallHeight=11;
+
+    volatile double dblBallX=0.0d;
+    volatile double dblBallY=0.0d;
+
+    volatile double dblBallMoveX=0.0d;
+    volatile double dblBallMoveY=0.0d;
+
+    volatile int intEdgeWidth=10;
+
+    volatile boolean blnUserWins=true;
+
+    volatile boolean blnGameActive=false;
+
+    PongCanvas() {
+      super();
+    }
+
+    public void startGame() {
+      stopGame();
+
+      Dimension dimCanvas=getSize();
+
+//Set the user and AI slider positions to the middle of the screen
+      intUserSliderPosition=dimCanvas.height/2-intSliderHeight/2;
+      intAISliderPosition=dimCanvas.height/2-intSliderHeight/2;
+
+//Set the ball position to the middle of the screen
+      dblBallX=(double)(dimCanvas.width/2);
+      dblBallY=(double)(dimCanvas.height/2);
+
+      double dblMoveX=Math.random();
+
+//Don't let the ball move x be too small of a number
+      if(dblMoveX&lt;=0.1d)
+        dblMoveX=0.1d;
+
+//Make dblMoveY smaller than dblMoveX
+      double dblMoveY=dblMoveX/2.0d*Math.random();
+
+//Don't let the ball move y be too small of a number
+      if(dblMoveY&lt;=0.05d)
+        dblMoveY=0.05d;
+
+//Half of the time dblMoveX is positive and half of the time dblMoveX is negative
+      if(Math.random()&gt;0.5d)
+        dblMoveX=-dblMoveX;
+
+//Half of the time dblMoveY is positive and half of the time dblMoveY is negative
+      if(Math.random()&gt;0.5d)
+        dblMoveY=-dblMoveY;
+
+//Get the magnitude of the vector formed by dblMoveX and dblMoveY
+      double dblDistance=Math.sqrt(Math.pow(dblMoveX, 2.0d)+Math.pow(dblMoveY, 2.0d));
+
+//Make the vector formed by dblMoveX and dblMoveY into a unit vector
+      dblMoveX=dblMoveX/dblDistance;
+      dblMoveY=dblMoveY/dblDistance;
+
+      dblBallMoveX=dblMoveX;
+      dblBallMoveY=dblMoveY;
+
+//Scale up the vector formed by dblBallMoveX and dblBallMoveY up by a factor of 10
+      dblBallMoveX*=10.0d;
+      dblBallMoveY*=10.0d;
+
+//If the ball is moving toward the AI's side of the screen then have the AI compute where the ball will meet with the AI's slider
+      if(dblMoveX&gt;0.0d) {
+        thrAI.computeSliderMove();
+      }
+      else {
+//The ball isn't moving toward the AI, so don't have the AI move
+        thrAI.intAISliderPositionStop=intAISliderPosition;
+      }
+
+//Set the boolean so that the game is marked as active which is evaluated in "paint" of PongCanvas and "run" of BallMoveThread
+      blnGameActive=true;
+
+      repaint();
+    }
+
+    public void stopGame() {
+      thrAI.stopSliderMove();
+
+      blnGameActive=false;
+    }
+
+    public void arrowUp() {
+
+synchronized(syncAll) {
+
+      if((intUserSliderPosition-intUserSliderPositionIncrement)&lt;0)
+        intUserSliderPosition=0;
+      else
+        intUserSliderPosition=intUserSliderPosition-intUserSliderPositionIncrement;
+
+}
+
+      repaint();
+    }
+
+    public void arrowDown() {
+
+synchronized(syncAll) {
+
+      if((intUserSliderPosition+intSliderHeight+intUserSliderPositionIncrement)&gt;getSize().height)
+        intUserSliderPosition=getSize().height-intSliderHeight;
+      else
+        intUserSliderPosition=intUserSliderPosition+intUserSliderPositionIncrement;
+
+}
+
+      repaint();
+    }
+
+    public void paint(Graphics graph) {
+      Dimension dimCanvas=getSize();
+
+      if(!blnGameActive) {
+//If blnGameActive is false then print out who won in the middle of the screen
+
+        if(blnUserWins) {
+          String strWins="User Wins";
+
+          FontMetrics fMetr=graph.getFontMetrics();
+          int intWinsWidth=fMetr.stringWidth(strWins);
+          int intWinsHeight=fMetr.getHeight();
+
+          graph.drawString(strWins, dimCanvas.width/2-intWinsWidth/2, dimCanvas.height/2+intWinsHeight/2);
+        }
+        else {
+          String strWins="User Loses";
+
+          FontMetrics fMetr=graph.getFontMetrics();
+          int intWinsWidth=fMetr.stringWidth(strWins);
+          int intWinsHeight=fMetr.getHeight();
+
+          graph.drawString(strWins, dimCanvas.width/2-intWinsWidth/2, dimCanvas.height/2+intWinsHeight/2);
+        }
+
+        return;
+      }
+
+synchronized(syncAll) {
+
+      Color clrPrev=graph.getColor();
+
+      graph.setColor(Color.black);
+
+//Draw the northern edge
+      graph.fillRect(0, 0, dimCanvas.width, intEdgeWidth);
+
+//Draw the southern edge
+      graph.fillRect(0, dimCanvas.height-intEdgeWidth, dimCanvas.width, intEdgeWidth);
+
+      graph.setColor(Color.red);
+
+//Draw the user's slider
+      graph.fillRect(0, intUserSliderPosition, intSliderWidth, intSliderHeight);
+
+//Draw the AI's slider
+      graph.fillRect(dimCanvas.width-intSliderWidth, intAISliderPosition, intSliderWidth, intSliderHeight);
+
+      graph.setColor(Color.green);
+
+//Draw the ball
+      graph.fillOval(((int)Math.rint(dblBallX))-intBallWidth/2, ((int)Math.rint(dblBallY))-intBallHeight/2, intBallWidth, intBallHeight);
+
+}
+
+    }
+  }
+
+  class BallMoveThread extends Thread {
+    volatile long lngSleepTime=50l;
+    volatile boolean blnKeepAlive=true;
+
+    BallMoveThread() {
+      super();
+    }
+
+    public void run() {
+      try {
+        while(blnKeepAlive) {
+          if(!canvasPong.blnGameActive) {
+            Thread.sleep(1000);
+            continue;
+          }
+
+synchronized(syncAll) {
+
+//Move the ball's position
+          canvasPong.dblBallX+=canvasPong.dblBallMoveX;
+          canvasPong.dblBallY+=canvasPong.dblBallMoveY;
+
+
+//Check to see if the ball's position places it for bouncing off of the user's slider
+          Rectangle user=new Rectangle(0, canvasPong.intUserSliderPosition, canvasPong.intSliderWidth, canvasPong.intSliderHeight);
+          if(user.contains(canvasPong.dblBallX, canvasPong.dblBallY)) {
+            canvasPong.dblBallMoveX=-canvasPong.dblBallMoveX;
+            canvasPong.dblBallX=canvasPong.intSliderWidth+1;
+
+            thrAI.computeSliderMove();
+          }
+
+
+//Check to see if the ball's position places it for bouncing off of the AI's slider
+          Rectangle ai=new Rectangle(canvasPong.getSize().width-canvasPong.intSliderWidth, canvasPong.intAISliderPosition, canvasPong.intSliderWidth, canvasPong.intSliderHeight);
+          if(ai.contains(canvasPong.dblBallX, canvasPong.dblBallY)) {
+            canvasPong.dblBallMoveX=-canvasPong.dblBallMoveX;
+            canvasPong.dblBallX=canvasPong.getSize().width-canvasPong.intSliderWidth-1;
+          }
+
+
+//Check to see if the ball's position places it for bouncing off of the northern edge
+          Rectangle northernEdge=new Rectangle(0, 0, canvasPong.getSize().width, canvasPong.intEdgeWidth);
+          if(northernEdge.contains(canvasPong.dblBallX, canvasPong.dblBallY)) {
+            canvasPong.dblBallMoveY=-canvasPong.dblBallMoveY;
+          }
+
+
+//Check to see if the ball's position places it for bouncing off of the southern edge
+          Rectangle southernEdge=new Rectangle(0, canvasPong.getSize().height-canvasPong.intEdgeWidth, canvasPong.getSize().width, canvasPong.intEdgeWidth);
+          if(southernEdge.contains(canvasPong.dblBallX, canvasPong.dblBallY)) {
+            canvasPong.dblBallMoveY=-canvasPong.dblBallMoveY;
+          }
+
+
+          if(canvasPong.dblBallX&lt;0.0d) {
+//If the dblBallX is less than 0 then the ball passed by the user's slider, so the AI wins
+
+            canvasPong.blnUserWins=false;
+
+            canvasPong.stopGame();
+          }
+          else if(canvasPong.dblBallX&gt;canvasPong.getSize().width) {
+//If the dblBallX is greater than PongCanvas's width then the ball passed by the AI's slider, so the user wins
+
+            canvasPong.blnUserWins=true;
+
+            canvasPong.stopGame();
+          }
+
+}
+
+          canvasPong.repaint();
+
+          Thread.sleep(lngSleepTime);
+        }
+      }
+      catch(Exception ex) {
+        ex.printStackTrace();
+      }
+    }
+  }
+
+  class ArtificialIntelligenceThread extends Thread {
+    volatile long lngSleepTime=100l;
+
+    volatile int intAISliderPositionIncrement=10;
+
+    volatile int intAISliderPositionStop=0;
+
+    volatile boolean blnKeepAlive=true;
+
+    ArtificialIntelligenceThread() {
+      super();
+    }
+
+    public void computeSliderMove() {
+
+synchronized(syncAll) {
+
+//Save the dblBallX and dblBallY for resetting them after the computing of this function is done
+      double dblBallXPrevious=canvasPong.dblBallX;
+      double dblBallYPrevious=canvasPong.dblBallY;
+
+//Save the dblBallMoveX and dblBallMoveY for resetting them after the computing of this function is done
+      double dblBallMoveXPrevious=canvasPong.dblBallMoveX;
+      double dblBallMoveYPrevious=canvasPong.dblBallMoveY;
+
+      while(true) {
+//Move the ball's position
+        canvasPong.dblBallX+=canvasPong.dblBallMoveX;
+        canvasPong.dblBallY+=canvasPong.dblBallMoveY;
+
+
+//Check to see if the ball's position places it for bouncing off of the northern edge
+        Rectangle northernEdge=new Rectangle(0, 0, canvasPong.getSize().width, canvasPong.intEdgeWidth);
+        if(northernEdge.contains(canvasPong.dblBallX, canvasPong.dblBallY)) {
+          canvasPong.dblBallMoveY=-canvasPong.dblBallMoveY;
+        }
+
+
+//Check to see if the ball's position places it for bouncing off of the southern edge
+        Rectangle southernEdge=new Rectangle(0, canvasPong.getSize().height-canvasPong.intEdgeWidth, canvasPong.getSize().width, canvasPong.intEdgeWidth);
+        if(southernEdge.contains(canvasPong.dblBallX, canvasPong.dblBallY)) {
+          canvasPong.dblBallMoveY=-canvasPong.dblBallMoveY;
+        }
+
+
+//If dblBallX is greater than PongCanvas's width then that is where the ball will eventually arrive at, so have the AI move its slider accordingly
+        if(canvasPong.dblBallX&gt;canvasPong.getSize().width) {
+          intAISliderPositionStop=((int)Math.rint(canvasPong.dblBallY))-canvasPong.intSliderHeight/2;
+
+          if(intAISliderPositionStop&lt;0)
+            intAISliderPositionStop=0;
+          else if((intAISliderPositionStop+canvasPong.intSliderHeight)&gt;canvasPong.getSize().height)
+            intAISliderPositionStop=canvasPong.getSize().height-canvasPong.intSliderHeight;
+
+          break;
+        }
+      }
+
+//Reset the variables
+      canvasPong.dblBallX=dblBallXPrevious;
+      canvasPong.dblBallY=dblBallYPrevious;
+
+      canvasPong.dblBallMoveX=dblBallMoveXPrevious;
+      canvasPong.dblBallMoveY=dblBallMoveYPrevious;
+
+}
+
+    }
+
+    public void stopSliderMove() {
+
+synchronized(syncAll) {
+
+//Set the field so that it will not move in the "run" function
+      intAISliderPositionStop=canvasPong.intAISliderPosition;
+
+}
+
+    }
+
+    public void run() {
+      try {
+        while(blnKeepAlive) {
+          if(intAISliderPositionStop==canvasPong.intAISliderPosition) {
+//If this evaluated to true then don't have the slider move
+            Thread.sleep(500);
+
+            continue;
+          }
+
+synchronized(syncAll) {
+
+          if(intAISliderPositionStop&lt;canvasPong.intAISliderPosition) {
+//Move the AI's slider to the north
+            canvasPong.intAISliderPosition-=intAISliderPositionIncrement;
+
+            if(canvasPong.intAISliderPosition&lt;intAISliderPositionStop)
+              canvasPong.intAISliderPosition=intAISliderPositionStop;
+          }
+          else if(intAISliderPositionStop&gt;canvasPong.intAISliderPosition) {
+//Move the AI's slider to the south
+            canvasPong.intAISliderPosition+=intAISliderPositionIncrement;
+
+            if(canvasPong.intAISliderPosition&gt;intAISliderPositionStop)
+              canvasPong.intAISliderPosition=intAISliderPositionStop;
+          }
+
+}
+
+          canvasPong.repaint();
+
+          Thread.sleep(lngSleepTime);
+        }
+      }
+      catch(Exception ex) {
+        ex.printStackTrace();
+      }
+    }
+  }
+}
+</div>
+
+In the above example, the first difference you might notice is that PongExample implements an interface you
+haven't seen yet called KeyEventDispatcher. The KeyEventDispatcher handles keyboard stroke events. In
+the constructor for PongExample the KeyboardFocusManager in effect for your computer is assigned to the
+"manager" variable then the "this" PongExample is added to the KeyboardFocusManager. Farther down the code
+you will notice a function "dispatchKeyEvent" which is called everytime a keyboard key is pressed.
+Inside of that function the first thing we do is check to see if the event source is a TextField or
+TextArea, and if it is from a text object then return from the event handling function because
+the key press wasn't intended for our event handling process. Next, we check what "keyCode" is pressed,
+and if it is virtual key up(VK_UP) or virtual key down(VK_DOWN) then we move the user's slider accordingly.
+
+I included comments in the source code for describing what the code snippets purpose is. Most of the
+artificial intelligence takes place in the ArtificialIntelligenceThread with some modification of
+fields in the PongCanvas.
+
+In this lesson, you learned how to create a simple arcade style game which allows the user to interact
+with the program by using the keyboard's key strokes. Basic artificial intelligence is implemented by
+creating a computer controlled thread that responds to the trajectory of a virtual ball.
+</pre>
+</body>
+</html>

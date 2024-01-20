@@ -1,0 +1,598 @@
+<html>
+<head>
+<title>
+BIM Teach Java - java.net.ServerSocket and java.net.Socket
+</title>
+</head>
+<body>
+<h2>java.net.ServerSocket and java.net.Socket</h2>
+<pre>
+At times it is useful to be able to host an application on the Internet. In Java, this can be achieved by
+using the ServerSocket class which allows clients from all over the world to connect to your application
+using the Socket class. In order to host your application, your web hosting service must provide
+you with a Java virtual machine to execute your application on. Also, you must allow the intended
+clients download the client-side to your application. In this lesson, you will learn how to use
+localhost to test out your server application on your own desktop or laptop.
+
+Here is the server-side <a href="ServerSideApplication.java">example</a>:
+<div style="background-color:lightgrey;">import java.net.*;
+import java.io.*;
+import java.util.Vector;
+
+class ServerSideApplication {
+  volatile ServerSocket serverSocket;
+  volatile Vector vecClients=new Vector();
+  static volatile Object syncObj=new Object();
+
+  public static void main(String args[]) {
+    try {
+      if(args.length==0) {
+        System.out.println("Usage:");
+        System.out.println("  java ServerSideApplication &lt;port number&gt;");
+
+        return;
+      }
+
+      ServerSideApplication sApp=new ServerSideApplication();
+
+      sApp.serverSocket=new ServerSocket(Integer.parseInt(args[0]));
+
+      System.out.println("Server Up!!");
+
+      while(true) {
+        Socket socketNew=sApp.serverSocket.accept();
+
+        System.out.println("Client Accepted");
+
+        ServerSideApplication.ServerSideThread serverSideThread=sApp.new ServerSideThread(sApp, socketNew);
+        serverSideThread.start();
+
+//        System.out.println("Client Thread Started");
+
+synchronized(ServerSideApplication.syncObj) {
+        sApp.vecClients.addElement(serverSideThread);
+}
+
+//        System.out.println("Client Added to Vector");
+      }
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  ServerSideApplication() {
+  }
+
+  class ServerSideThread extends Thread {
+    ServerSideApplication sApp;
+    Socket socket;
+    DataInputStream dis;
+    DataOutputStream dos;
+
+    ServerSideThread(ServerSideApplication sApp, Socket socket) throws Exception {
+      this.sApp=sApp;
+      this.socket=socket;
+      dis=new DataInputStream(socket.getInputStream());
+      dos=new DataOutputStream(socket.getOutputStream());
+    }
+
+    public void run() {
+      try {
+        while(true) {
+          int intBufferSize=dis.readInt();
+
+          byte byteBuf[]=new byte[intBufferSize];
+          dis.readFully(byteBuf);
+
+          System.out.println("Size of Message: "+intBufferSize);
+
+synchronized(ServerSideApplication.syncObj) {
+
+          for(int i=0;i&lt;sApp.vecClients.size();i++) {
+            ServerSideThread serverSideThread=(ServerSideThread)sApp.vecClients.elementAt(i);
+            serverSideThread.dos.writeInt(byteBuf.length);
+            serverSideThread.dos.write(byteBuf, 0, byteBuf.length);
+
+            serverSideThread.dos.flush();
+          }
+
+}
+        }
+      }
+      catch(Exception ex) {
+synchronized(ServerSideApplication.syncObj) {
+        sApp.vecClients.remove(this);
+}
+      }
+    }
+  }
+}
+</div>
+
+The first thing you should notice in ServerSideApplication is that the fields are declared volatile which
+indicates that we will be using multiple threads.
+
+Inside the "main" function we create a new java.net.ServerSocket to listen for connections on the port passed
+in as a command line argument. Next, a while loop is used to accept an unlimited number of connections using
+ServerSocket's "accept" function. Once a client has connected to our server we create a ServerSideThread
+to block until client information is sent to the server inside the ServerSideThread's "run" function.
+
+Each client that connects is added to the Vector of clients connected to the server, so that when we
+receive a message from a client we can transmit that message to each connected client using the Socket
+for each particular client.
+
+Inside of the "run" function of ServerSideThread, a loop is started to receive information from that
+threads socket input stream. The line of code with dis.readInt() blocks execution until the client
+sends a message to the server. Once the client does send a message code executes as normal. We
+print out the size of the message to the server's standard output stream. Next, we iterate through
+the connections stored in "vecClients" and transmit the message received to all of the clients.
+Notice that we call the "flush" function after writing all of the information to each client. It
+is necessary to call flush to prevent blocking data on the reader on each client because of buffered
+stream flow.
+
+Lastly, if an exception occurs in ServerSideThread's "run" function then remove the ServerSideThread
+from the clients stored in "vecClients".
+
+
+Here is the client-side <a href="ClientSideApplication.java">example</a>:
+<div style="background-color:lightgrey;">import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.net.*;
+import java.io.*;
+
+class ClientSideApplication extends Frame
+implements ActionListener {
+  volatile Socket clientSocket;
+  volatile DataInputStream dis;
+  volatile DataOutputStream dos;
+  volatile ClientSideThread clientSideThread;
+
+  volatile TextArea txtArea=new TextArea();
+  volatile TextField txtMessage=new TextField();
+  volatile Button btnSendMessage=new Button("Send Message");
+
+  public static void main(String args[]) {
+    try {
+      if(args.length==0) {
+        System.out.println("Usage:");
+        System.out.println("  java ClientSideApplication &lt;port number to connect to&gt;");
+
+        return;
+      }
+
+      int intPort=Integer.parseInt(args[0]);
+
+      Socket clientSocket=new Socket("localhost", intPort);
+
+      ClientSideApplication cFrame=new ClientSideApplication(clientSocket);
+      Dimension dimScreen=Toolkit.getDefaultToolkit().getScreenSize();
+      cFrame.setSize(dimScreen.width, dimScreen.height-40);
+      cFrame.setVisible(true);
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  ClientSideApplication(Socket clientSocket) throws Exception {
+    super("Client Side Application");
+    this.clientSocket=clientSocket;
+    dis=new DataInputStream(clientSocket.getInputStream());
+    dos=new DataOutputStream(clientSocket.getOutputStream());
+
+    setIconImage(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB));
+    addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent we) {
+        System.exit(0);
+      }
+    });
+
+    add("Center", txtArea);
+
+    Panel tempPan=new Panel();
+    tempPan.setLayout(new BorderLayout());
+    tempPan.add("West", new Label("Message:"));
+    tempPan.add("Center", txtMessage);
+    tempPan.add("East", btnSendMessage);
+    btnSendMessage.addActionListener(this);
+
+    add("South", tempPan);
+
+    clientSideThread=new ClientSideThread();
+    clientSideThread.start();
+  }
+
+  public void actionPerformed(ActionEvent ae) {
+    Object evSource=ae.getSource();
+
+    if(evSource==btnSendMessage) {
+      String strMessage=txtMessage.getText();
+
+      if(strMessage.length()==0)
+        return;
+
+      try {
+        dos.writeInt(strMessage.length());
+        dos.writeBytes(strMessage);
+
+        dos.flush();
+      }
+      catch(Exception ex) {
+        ex.printStackTrace();
+      }
+    }
+  }
+
+  class ClientSideThread extends Thread {
+    volatile boolean blnKeepAlive=true;
+
+    ClientSideThread() {
+      super();
+    }
+
+    public void run() {
+      try {
+        while(blnKeepAlive) {
+          int intMessageLength=dis.readInt();
+          byte byteBuf[]=new byte[intMessageLength];
+          dis.readFully(byteBuf);
+
+          String strMessage=new String(byteBuf);
+
+          txtArea.append(strMessage+"\n");
+        }
+      }
+      catch(Exception ex) {
+        ex.printStackTrace();
+      }
+    }
+  }
+}
+</div>
+
+Once again, in ClientSideApplication you should notice that the fields are declared volatile meaning that
+multiple threads will be executing in the application.
+
+In the "main" function we create a java.net.Socket which attempts to connect to the "localhost"(which is
+the desktop or laptop executing the application) on a port specified by the first command line argument.
+If the ServerSideApplication isn't executed before execution of the ClientSideApplication then a
+ConnectException is thrown and the application exits. In the real world, if this was a real networked
+application then we would type in a host name or an IP address in place of "localhost" and this
+application would communicate over the Internet.
+
+If the Socket is created then it is passed as a constructor parameter to ClientSideApplication.
+The ClientSideApplication constructor throws Exception because the program can't run properly
+without functioning DataInputStream and DataOutputStream which are both initialized in the
+constructor. At the end of the constructor a ClientSideThread is created to listen for data
+transmitted to the DataInputStream which blocks until data is available. If ClientSideThread
+wasn't an inner class with access to the DataInputStream and the TextArea then both of those
+variables would have to be passed in as parameters to ClientSideThread's constructor and
+stored in class fields.
+
+In "actionPerformed" the button click event for "btnSendMessage" is handled by getting text
+from "txtMessage". The length of the String is checked and if it is 0 then the function returns
+without using the DataOutputStream. In the situation where the String is transmitted, the
+length of the String is sent over to the server as an int to tell the server how big its
+byte buffer must be to store the entire String. This is a common approach. Whenever sending
+a variable length byte array, first send the length of the buffer. The DataOutputStream's
+"writeBytes" function takes a String parameter and sends the byte[] representation through
+the stream. Lastly, the "flush" function is called to send any buffered data through the
+stream.
+
+In the "run" function of the inner class ClientSideThread, the thread blocks until an
+int is read using "readInt" and then a byte[] buffer is created to store the data
+sent through the stream. A String representation of the byte buffer is constructed and
+it is appended to the text in the TextArea "txtArea".
+
+If you haven't already executed the ServerSideApplication and ClientSideApplication
+now is a good time to do it. I will walk you through the steps.
+
+<ol>
+<li>Compile ServerSideApplication.java and ClientSideApplication.java</li>
+<li>Open up 3 command line consoles. In Windows 8, right click one open command line console on the taskbar 
+and click on the item that reads "Command Prompt"</li>
+<li>In one command line console execute "java ServerSideApplication 25432"</li>
+<li>In the other two consoles execute "java ClientSideApplication 25432"</li>
+<li>Type any text into a single ClientSideApplication and press the "Send Message" button</li>
+<li>Use your mouse to click on each of the 2 open ClientSideApplication and notice how the 
+text you sent using one application has been transmitted to both clients. The same results
+will be generated for n number of clients.</li>
+</ol>
+
+
+In the next example I will show you how to implement a ZipOutputStream and ZipInputStream to compress
+and decompress data before it is sent between the client and the server. In most cases, it is faster
+to compress data before sending it across the Internet because code that executes on a single computer
+generally runs faster than data sent across the Internet. However, there is a drawback and with
+the zip classes it is the overhead of constructing ZipOutputStream and ZipInputStream with ZipEntrys.
+In the following example, the ZipEntry class takes up more byte array space than the message itself
+for small messages, so in all practicality the use of ZipOutputStream and ZipInputStream makes this
+particular application run slower than the original ClientSideApplication and ServerSideApplication.
+That said, we can still demonstrate the programming code necessary to implement compression and
+decompression with only a couple modifications from the code in the previous examples. So, create
+a copy of the source file ClientSideApplication.java and rename it to ClientSideApplicationZipped.java .
+Go into the new ClientSideApplicationZipped.java file and change the class name declaration and
+constructors involving ClientSideApplication to be ClientSideApplicationZipped. You will also need
+to "import java.util.zip.*;".
+
+Here are the code snippets for the ZipOutputStream:
+<div style="background-color:lightgrey;">        ByteArrayOutputStream baos=new ByteArrayOutputStream();
+        ZipOutputStream zos=new ZipOutputStream(baos);
+        byte byteBuf[]=strMessage.getBytes();
+        zos.putNextEntry(new ZipEntry("message"));
+        zos.write(byteBuf, 0, byteBuf.length);
+        zos.closeEntry();
+        zos.flush();
+        byte byteCompressedBuf[]=baos.toByteArray();
+
+        dos.writeInt(byteCompressedBuf.length);
+        dos.write(byteCompressedBuf, 0, byteCompressedBuf.length);
+
+        dos.flush();
+</div>
+Which replaces the code in "actionPerformed":
+<div style="background-color:lightgrey;">        dos.writeInt(strMessage.length());
+        dos.writeBytes(strMessage);
+
+        dos.flush();
+</div>
+
+In the above snippet, the line of code that will change for each implementation you make of
+the ZipOutputStream is the line:
+<div style="background-color:lightgrey;">        zos.write(byteBuf, 0, byteBuf.length);
+</div>
+That line of code can be replaced by as many "write" function calls as you choose.
+
+Here are the code snippets for the ZipInputStream:
+<div style="background-color:lightgrey;">          String strMessage="";
+
+          ByteArrayInputStream bais=new ByteArrayInputStream(byteBuf);
+          ZipInputStream zis=new ZipInputStream(bais);
+          ZipEntry zEntry=zis.getNextEntry();
+          if(zEntry!=null) {
+            int n=-1;
+            byte buf[]=new byte[1024];
+            while((n=zis.read(buf, 0, 1024))&gt;-1) {
+              strMessage+=new String(buf, 0, n);
+            }
+
+            zis.closeEntry();
+          }
+</div>
+Which replaces the code in "run" of ClientSideThread:
+<div style="background-color:lightgrey;">          String strMessage=new String(byteBuf);
+</div>
+
+The line of code with the "while" loop reads data from the input stream in 1024 byte increments
+and returns the actual number of bytes read in the variable "n". If "n" isn't greater than "-1"
+then the loop stops executing because the end of the stream has been encountered. "strMessage"
+has new Strings concatenated to it until the entire message has been read.
+
+You can test out the new client side application by following the steps given above to test
+the first version of ClientSideApplication, but this time substitute in ClientSideApplicationZipped.
+
+
+For our final example, we will create a client side application that both compresses data and
+encrypts data.
+
+Here is the <a href="ClientSideApplicationZippedAndEncrypted.java">example</a>:
+<div style="background-color:lightgrey;">import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.net.*;
+import java.io.*;
+import java.util.zip.*;
+import javax.crypto.*;
+import javax.crypto.spec.*;
+
+class ClientSideApplicationZippedAndEncrypted extends Frame
+implements ActionListener {
+  volatile Socket clientSocket;
+  volatile DataInputStream dis;
+  volatile DataOutputStream dos;
+  volatile ClientSideThread clientSideThread;
+
+  volatile TextArea txtArea=new TextArea();
+  volatile TextField txtMessage=new TextField();
+  volatile Button btnSendMessage=new Button("Send Message");
+
+  volatile SecretKey key;
+
+  public static void main(String args[]) {
+    try {
+      if(args.length!=2) {
+        System.out.println("Usage:");
+        System.out.println("  java ClientSideApplicationZippedAndEncrypted &lt;port number to connect to&gt; &lt;password for encryption key; must be at least 8 characters&gt;");
+
+        return;
+      }
+      else if(args[1].length()&lt;8) {
+        System.out.println("Usage:");
+        System.out.println("  java ClientSideApplicationZippedAndEncrypted &lt;port number to connect to&gt; &lt;password for encryption key; must be at least 8 characters&gt;");
+
+        return;
+      }
+
+      int intPort=Integer.parseInt(args[0]);
+
+      Socket clientSocket=new Socket("localhost", intPort);
+
+      ClientSideApplicationZippedAndEncrypted cFrame=new ClientSideApplicationZippedAndEncrypted(clientSocket);
+      Dimension dimScreen=Toolkit.getDefaultToolkit().getScreenSize();
+      cFrame.setSize(dimScreen.width, dimScreen.height-40);
+      cFrame.setVisible(true);
+
+      DESKeySpec dks=new DESKeySpec(args[1].getBytes());
+      SecretKeyFactory skf=SecretKeyFactory.getInstance("DES");
+      cFrame.key=skf.generateSecret(dks);
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  ClientSideApplicationZippedAndEncrypted(Socket clientSocket) throws Exception {
+    super("Client Side Application Zipped");
+    this.clientSocket=clientSocket;
+    dis=new DataInputStream(clientSocket.getInputStream());
+    dos=new DataOutputStream(clientSocket.getOutputStream());
+
+    setIconImage(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB));
+    addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent we) {
+        System.exit(0);
+      }
+    });
+
+    add("Center", txtArea);
+
+    Panel tempPan=new Panel();
+    tempPan.setLayout(new BorderLayout());
+    tempPan.add("West", new Label("Message:"));
+    tempPan.add("Center", txtMessage);
+    tempPan.add("East", btnSendMessage);
+    btnSendMessage.addActionListener(this);
+
+    add("South", tempPan);
+
+    clientSideThread=new ClientSideThread();
+    clientSideThread.start();
+  }
+
+  public void actionPerformed(ActionEvent ae) {
+    Object evSource=ae.getSource();
+
+    if(evSource==btnSendMessage) {
+      String strMessage=txtMessage.getText();
+
+      if(strMessage.length()==0)
+        return;
+
+      try {
+        ByteArrayOutputStream baos=new ByteArrayOutputStream();
+        ZipOutputStream zos=new ZipOutputStream(baos);
+        byte byteBuf[]=strMessage.getBytes();
+        zos.putNextEntry(new ZipEntry("message"));
+        zos.write(byteBuf, 0, byteBuf.length);
+        zos.closeEntry();
+        zos.flush();
+        byte byteCompressedBuf[]=baos.toByteArray();
+
+        Cipher desCipher=Cipher.getInstance("DES/ECB/PKCS5Padding");
+
+        // Initialize the cipher for encryption
+        desCipher.init(Cipher.ENCRYPT_MODE, key);
+
+        // Encrypt the text
+        byte textEncrypted[]=desCipher.doFinal(byteCompressedBuf);
+        
+        dos.writeInt(textEncrypted.length);
+        dos.write(textEncrypted, 0, textEncrypted.length);
+
+        dos.flush();
+      }
+      catch(Exception ex) {
+        ex.printStackTrace();
+      }
+    }
+  }
+
+  class ClientSideThread extends Thread {
+    volatile boolean blnKeepAlive=true;
+
+    ClientSideThread() {
+      super();
+    }
+
+    public void run() {
+      try {
+        while(blnKeepAlive) {
+          int intMessageLength=dis.readInt();
+          byte byteBuf[]=new byte[intMessageLength];
+          dis.readFully(byteBuf);
+
+          Cipher desCipher=Cipher.getInstance("DES/ECB/PKCS5Padding");
+
+          // Initialize the cipher for decryption
+          desCipher.init(Cipher.DECRYPT_MODE, key);
+
+          // Encrypt the text
+          byte textDecrypted[]=desCipher.doFinal(byteBuf);
+
+
+          String strMessage="";
+
+          ByteArrayInputStream bais=new ByteArrayInputStream(textDecrypted);
+          ZipInputStream zis=new ZipInputStream(bais);
+          ZipEntry zEntry=zis.getNextEntry();
+          if(zEntry!=null) {
+            int n=-1;
+            byte buf[]=new byte[1024];
+            while((n=zis.read(buf, 0, 1024))&gt;-1) {
+              strMessage+=new String(buf, 0, n);
+            }
+
+            zis.closeEntry();
+          }
+
+          txtArea.append(strMessage+"\n");
+        }
+      }
+      catch(Exception ex) {
+        ex.printStackTrace();
+      }
+    }
+  }
+}
+</div>
+
+The first difference between this source file and ClientSideApplication is that we imported some cryptography
+libraries with the prefix "java.crypto.". We also declared a SecretKey object in ClientSideApplicationZippedAndEncrypted
+as a class field. Whenever we encrypt or decrypt data we will use the SecretKey assigned to the field "key".
+
+In the "main" function, the command used to execute the class has changed from a single command line
+argument to a two command line argument program. The first argument is still the port to connect to.
+The second argument is a password to initialize the SecretKey to. We will be using Data Encryption Standard,
+or DES, for this example. The password we use must be at least 8 characters in length.
+
+At the end of the "main" function, we generate our SecretKey and assign it to the "key" field.
+
+Next, scroll down to "actionPerformed" and look for the declaration with the Cipher object.
+The Cipher object is initialized to work with DES then is "init"d for encryption with the
+SecretKey "key" we created earlier. Any byte arrays we pass into "doFinal" are encrypted
+and the encrypted data is returned in a byte array that we call "textEncrypted". Next,
+we write the encrypted buffer to the output stream the same way we did we the previous
+examples of ClientSideApplication.
+
+Scroll down to the "run" function of ClientSideThread and look for the declaration with
+the Cipher object. It is the same as when we wanted to encrypt data. This time when
+we call "init", the Cipher is initialized to decrypt data with the SecretKey "key".
+
+The data that is encrypted in a byte array is passed into the Cipher's "doFinal" function
+which returns a byte array with the decrypted data which is then decompressed as described
+in the previous example.
+
+If you haven't already executed the ServerSideApplication and ClientSideApplicationZippedAndEncrypted
+now is a good time to do it. I will walk you through the steps.
+
+<ol>
+<li>Compile ServerSideApplication.java and ClientSideApplicationZippedAndEncrypted.java</li>
+<li>Open up 3 command line consoles. In Windows 8, right click one open command line console on the taskbar 
+and click on the item that reads "Command Prompt"</li>
+<li>In one command line console execute "java ServerSideApplication 25432"</li>
+<li>In the other two consoles execute "java ClientSideApplication 25432 rightKey"</li>
+<li>Type any text into a single ClientSideApplication and press the "Send Message" button</li>
+<li>Use your mouse to click on each of the 2 open ClientSideApplication and notice how the 
+text you sent using one application has been transmitted to both clients. The same results
+will be generated for n number of clients.</li>
+</ol>
+
+In this lesson, you learned how to create a server client architecture in the form of a chat room server.
+You learned how to implement functionality with blocking DataInputStreams using individual threads.
+You also learned how to compress and decompress data using ZipOutputStream and ZipInputStream.
+Lastly, you learned how to encrypt data using Data Encryption Standard Ciphers and SecretKey.
+</pre>
+</body>
+</html>

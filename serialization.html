@@ -1,0 +1,162 @@
+<html>
+<head>
+<title>
+BIM Teach Java - Object Serialization
+</title>
+</head>
+<body>
+<h2>Object Serialization</h2>
+<pre>
+Object serialization is a input and output system provided by Java. Instead of writing to a DataOutputStream
+or reading from a DataInputStream with primitives and Strings the object serialization functionality allows
+Object instances to be written or read with a single function call.
+
+Here is an <a href="BankClientSerialization.java">example</a>:
+<div style="background-color:lightgrey;">import java.io.File;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.io.IOException;
+
+class BankClientSerialization
+implements Serializable {
+  static double MAX_BALANCE=200000.0d;
+
+  private String strName;
+  private String strSocialSecurityNumber;
+  private Double dblBankBalanceO=new Double(0.0d);
+  private transient double dblBankBalance=0.0d;
+
+  public static void main(String args[]) {
+    try {
+      if(args.length==0) {
+        System.out.println("Usage:");
+        System.out.println("  java BankClientSerialization <either \"input\" or \"output\">");
+        System.out.println("For example:");
+        System.out.println("  java BankClientSerialization output");
+
+        return;
+      }
+
+      if(args[0].equals("output")) {
+        String strName="John Smith";
+        String strSocialSecurityNumber="012345678";
+        double dblBankBalance=100.0d;
+
+        BankClientSerialization udtBankClient=new BankClientSerialization(strName, strSocialSecurityNumber, dblBankBalance);
+
+        ObjectOutputStream oos=new ObjectOutputStream(new FileOutputStream(new File("bankClientSerialization")));
+        oos.writeObject(udtBankClient);
+        oos.close();
+      }
+      else if(args[0].equals("input")) {
+        ObjectInputStream ois=new ObjectInputStream(new FileInputStream(new File("bankClientSerialization")));
+        BankClientSerialization udtBankClient=(BankClientSerialization)ois.readObject();
+        ois.close();
+
+        System.out.println(udtBankClient.getName());
+        System.out.println(udtBankClient.getSocialSecurityNumber());
+        System.out.println(udtBankClient.getBankBalance());
+      }
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  BankClientSerialization(String strName, String strSocialSecurityNumber, double dblBankBalance) {
+    this.strName=strName;
+    this.strSocialSecurityNumber=strSocialSecurityNumber;
+    this.dblBankBalance=dblBankBalance;
+    this.dblBankBalanceO=new Double(dblBankBalance);
+  }
+
+  public String getName() {
+    return strName;
+  }
+
+  public void setName(String strName) {
+    this.strName=strName;
+  }
+
+  public String getSocialSecurityNumber() {
+    return strSocialSecurityNumber;
+  }
+
+  public void setSocialSecurityNumber(String strSocialSecurityNumber) {
+    this.strSocialSecurityNumber=strSocialSecurityNumber;
+  }
+
+  public double getBankBalance() {
+    return dblBankBalance;
+  }
+
+  public void setBankBalance(double dblBankBalance) {
+    this.dblBankBalance=dblBankBalance;
+    this.dblBankBalanceO=new Double(dblBankBalance);
+  }
+
+  private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+    ois.defaultReadObject();
+    initializeTransients();
+  }
+
+  public void initializeTransients() {
+    dblBankBalance=dblBankBalanceO.doubleValue();
+  }
+}
+</div>
+
+First in the example, all the classes necessary for input and output are imported. Also, java.io.Serializable
+is imported which is necessary because any instance that we want to serialize must implement the
+java.io.Serializable interface. The primitive "dblBankBalance" is made transient because primitives
+can't be serialized, and a wrapper for "dblBankBalance" called "dblBankBalanceO" is declared for
+storing the bank balance when serialization occurs.
+
+Also, it is important to note that ObjectOutputStream overwrites the entire file that it writes to; it doesn't
+append data to the end of the file. I will cover appending to a file in a later lesson.
+
+After compiling BankClientSerialization run the program by typing "java BankClientSerialization output" then
+run the program again by typing "java BankClientSerialization input". You should see the information that
+was serialized by the output operation in the input operation.
+
+Farther down in the source file you can find a function signature "private void readObject(ObjectInputStream ois)".
+This function is called whenever an Object implementing this function is read using ObjectInputStream's "readObject"
+function. The function call "defaultReadObject" must be called to perform the deserialization of all the
+serializable fields. Next, I included a function called "initializeTransients" because there are fields
+in the class BankClientSerialization that are transients, and any transients MUST be re-initialized
+immediately after the class has been deserialized. Transients aren't re-initialized to their declaration
+values by the Java runtime environment, it is the programmers responsibility to initialize the transients
+as you can see in the "initializeTransients" function of BankClientSerialization.
+
+This next note is very important when using serialization. If you change the declaration of a class you are
+serializing by adding or removing a field or function then the class will not be deserializable because
+when an instance is serialized it stores the declaration of all fields and functions. Before compiling
+a new version of a serialized class make sure to write an intermediate class to store all the fields
+of the new version class. So, using this intermediate class for transfering data follows these steps:
+<ol>
+<li>Write the intermediate class code</li>
+<li>In the "main" function deserialize the serialized files to be updated</li>
+<li>In the "main" function serialize the Objects(with the intermediate class) that were just previously deserialized</li>
+<li>Compile the new version of the previously serialized class(the one being updated)</li>
+<li>In the "main" function(of the intermediate class) deserialize the Objects saved as the intermediate class</li>
+<li>In the "main" function serialize the Objects(with the new version) that were just previously deserialized</li>
+</ol>
+
+Fortunately, you don't need to go through the intermediate class process if you only modify code inside already
+existing functions of the class.
+
+If you are writing code that requires many modifications, or is in an unstable state, then you might want
+to consider using java.io.DataInputStream and java.io.DataOutputStream instead of object serialization.
+DataInputStream and DataOutputStream provide functions for reading and writing primitive data types
+and Strings.
+
+In this lesson, you learned about object serialization and read the ObjectOutputStream and ObjectInputStream
+in action. You saw a wrapper class be used for serializing a primitive type(dblBankBalance). You also learned
+about re-initializing transients. Lastly, we briefly covered how to transfer serialized versions of Objects
+when a class definition is declared with changes to fields or functions.
+</pre>
+</body>
+</html>
