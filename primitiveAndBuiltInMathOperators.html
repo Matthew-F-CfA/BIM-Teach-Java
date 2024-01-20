@@ -1,0 +1,173 @@
+<html>
+<head>
+<title>
+BIM Teach Java - Built-In Math Operators
+</title>
+<body>
+<h2>Built-In Math Operators</h2>
+<pre>
+One of the most fundamental implementations of Java and other programming languages is the
+utilization of math operations. In Java, the math operators are as follows:
+<ul>
+<li>+: Addition</li>
+<li>-: Subtraction</li>
+<li>*: Multiplication</li>
+<li>/: Division</li>
+<li>%: Remainder</li>
+</ul>
+
+You may have noticed there isn't an operator for exponents. Java deals with exponents by
+using the java.lang.Math static function "pow(number, exponent)".
+
+The following <a href="BuiltInMathOperators.java">example</a> uses the math operations:
+<div style="background-color:lightgrey;">class BuiltInMathOperators {
+
+  public static void main(String args[]) {
+/*
+This text is inside of a multiline Java comment. Any text in between the comment indicators isn't processed by the compiler.
+The purpose of this text is to aid the programmer in understanding the code.
+For example, this comment can be used to remind the programmer that the next "if" condition determines if the Usage specifier
+is displayed to the user.
+*/
+    if(args.length==0) {
+      System.out.println("Usage:");
+      System.out.println("  java BuiltInMathOperators <operation> <first number> <second number>\n");
+      System.out.println("<operation> must be one of addition, subtraction, multiplication, division, remainder, exponent");
+
+      return;
+    }
+
+    String strOperation=args[0];
+    String strOperand=args[1];
+    String strOperand0=args[2];
+
+    double dblOperand=Double.valueOf(strOperand).doubleValue();
+    double dblOperand0=Double.valueOf(strOperand0).doubleValue();
+
+    double dblOperated=0.0d;
+
+//This text is a single line comment. Any text appearing after the indicator doesn't get processed by the compiler.
+//The purpose of this text is to aid the programmer in understanding the code.
+
+//The next "if" condition checks if the operation to perform is "addition".
+    if(strOperation.equals("addition")) {
+      dblOperated=dblOperand+dblOperand0;
+    }
+    else if(strOperation.equals("subtraction")) {
+      dblOperated=dblOperand-dblOperand0;
+    }
+    else if(strOperation.equals("multiplication")) {
+      dblOperated=dblOperand*dblOperand0;
+    }
+    else if(strOperation.equals("division")) {
+      dblOperated=dblOperand/dblOperand0;
+    }
+    else if(strOperation.equals("remainder")) {
+      dblOperated=dblOperand%dblOperand0;
+    }
+    else if(strOperation.equals("exponent")) {
+      dblOperated=Math.pow(dblOperand, dblOperand0);
+    }
+    else {
+      System.out.println("Unrecognized operation.");
+      return;
+    }
+
+    System.out.println("The numbers computed to a result of "+dblOperated);
+  }
+}
+</div>
+
+One of the most useful tools for maintaining code is the comment sequences. There are two
+types of comments. One for multiline comments and one the single line comments.
+Multiline comments are identified by "/*" at the start of the comment and "*/" at
+the end of the comment. Any text in between the two sequences "/*" and "*/" isn't
+processed by the compiler.
+Single line comments are identified by "//". Any text that appears on the same line
+as the sequence and after the sequence isn't processed by the compiler.
+
+The example can be run after it has been compiled by typing in "java BuiltInMathOperators".
+Notice that you receive a message about how to use the application. It is up to the programmer
+to implement the usage protocol. In this example, the following lines of code does this:
+
+<div style="background-color:lightgrey;">    if(args.length==0) {
+      System.out.println("Usage:");
+      System.out.println("  java BuiltInMathOperators <operation> <first number> <second number>\n");
+      System.out.println("<operation> must be one of addition, subtraction, multiplication, division, remainder, exponent");
+
+      return;
+    }
+</div>
+
+"args" is the name of String array that was passed in as a parameter to the "main" function.
+"args.length" identifies the number of elements in the array. An array is a list of elements
+that can have any data type that the programmer chooses.
+Essentially, the first line performs a true or false boolean comparison between the number
+of elements in the array and the number "0". If that comparison computes to true then the
+lines of code in between the curly braces "{" and "}" is executed. In this case, the instructions
+executed are text printed out to the console. The last line of code in the if block is "return;"
+which tells the program to stop the sequential execution of lines of code in the calling function
+and exit the function immediately. In this case, the only function that is called is "main", so
+the program exits the execution of the console application.
+
+The "args" variable is a variable that the Java runtime environment builds for the program.
+It builds "args" by accepting command line arguments at the time when the application is
+executed. For this example, there are 3 arguments expected: operation, first number, and
+second number. These 3 arguments when typed in properly will populate the "args" variable,
+so if I type in "java BuiltInMathOperators addition 1 1" then the "args" array will have
+3 elements: args[0]="addition", args[1]="1", args[2]="1". Each of those elements are accessible
+within the console application.
+
+After assigning the "args" array elements to String variables, the following code converts
+each of the operands from String to double types because we need to use primitives for math
+operations.
+
+<div style="background-color:lightgrey;">    double dblOperand=Double.valueOf(strOperand).doubleValue();
+    double dblOperand0=Double.valueOf(strOperand0).doubleValue();
+</div>
+
+Later on we will discuss Java's exception handling mechanism for dealing with integrity checks
+when converting between Strings and numbers. This is necessary because sometimes people miss-type
+their operands and the Java runtime environment doesn't recognize the String as text that can be
+represented as a number.
+
+Next, the program executes a sequence of "if" and "else if" comparisons. If the text stored in
+"strOperation" matches any of the String literals passed in as parameters to "equals" then
+the code inside that "if" or "else if" block is executed. Only one of the "if"s or "else if"s
+can be executed, all the others are ignored. Notice the last "else" doesn't contain a
+comparison check which means that it should be executed in the case where none of the other
+comparisons were evaluated to be true. The "else" code will only execute in the event that
+the user of the application didn't type in an operation that is recognized by the application's
+usage description.
+
+<div style="background-color:lightgrey;">    if(strOperation.equals("addition")) {
+      dblOperated=dblOperand+dblOperand0;
+    }
+    else if(strOperation.equals("subtraction")) {
+      dblOperated=dblOperand-dblOperand0;
+    }
+    else if(strOperation.equals("multiplication")) {
+      dblOperated=dblOperand*dblOperand0;
+    }
+    else if(strOperation.equals("division")) {
+      dblOperated=dblOperand/dblOperand0;
+    }
+    else if(strOperation.equals("remainder")) {
+      dblOperated=dblOperand%dblOperand0;
+    }
+    else if(strOperation.equals("exponent")) {
+      dblOperated=Math.pow(dblOperand, dblOperand0);
+    }
+    else {
+      System.out.println("Unrecognized operation.");
+      return;
+    }
+</div>
+
+The final line of code prints out the result of the mathematical operation.
+In this lesson, you learned about writing a console application that accepts
+user input through command line arguments and the basics of arrays and if
+conditions along with the basic math operations provided by the Java language.
+</pre>
+</body>
+</html>

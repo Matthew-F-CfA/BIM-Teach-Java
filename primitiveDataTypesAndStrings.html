@@ -1,0 +1,151 @@
+<html>
+<head>
+<title>
+BIM Teach Java - Primitive Data Types and Strings
+</title>
+</head>
+<body>
+<h2>Primitive Data Types and Strings</h2>
+<pre>
+In previous lessons we talked briefly about class members and fields. In this lesson we will cover
+some of the data types that a field can have and why.
+
+Primitive Data Types:
+<ul>
+<li>boolean: 1 bit, values: true or false</li>
+<li>byte: 1 byte, values: -128 to 127</li>
+<li>short: 2 bytes, values: -32768 to 32767</li>
+<li>int: 4 bytes, values: -2147483648 to 2147483647</li>
+<li>long: 8 bytes, values: -9223372036854775808 to 9223372036854775807</li>
+<li>float: 4 bytes, values: smallest 1.4E-45 to largest 3.4028235E38</li>
+<li>double: 8 bytes, values: smallest 4.9E-324 to largest 1.7976931348623157E308</li>
+<li>char: 2 bytes, identified by ''</li>
+</ul>
+
+char: A single character which can be initialized using single quotes such as the letter:
+<div style="background-color:lightgrey;">char chr='a';
+</div>
+
+String: A sequence of text characters like a word or a sentence. Each character is a single byte
+        in length. The maximum length of a String is the same as the maximum value of an int which
+        is 2147483647.
+
+All primitive types are not Objects. Objects are defined by subclassing other Objects with the
+top of the Object hierarchy being java.lang.Object . In other words, primitive types do not
+have fields and functions. However, primitive types do have wrapper classes that have fields
+and functions. The wrapper classes for each are:
+boolean: java.lang.Boolean
+byte: java.lang.Byte
+short: java.lang.Short
+int: java.lang.Integer
+long: java.lang.Long
+float: java.lang.Float
+double: java.lang.Double
+char: java.lang.Character
+
+The most useful functions provided by the wrapper classes are the "valueOf" functions and the "toString"
+functions. The "valueOf" functions convert from a String to a wrapper class. The "toString" functions
+convert from a wrapper class to a String. Here is an example:
+
+<div style="background-color:lightgrey;">String strNumber="123";
+Integer intNumber=Integer.valueOf(strNumber);
+
+String strCopy=intNumber.toString();
+</div>
+
+The variable String strNumber is converted to a variable Integer intNumber which is normally
+done for performing some sort of mathematical operation on the variable. Notice that the
+variable intNumber isn't a primitive. You might ask yourself why have primitives if we have
+wrapper classes. The answer is that primitives are what are used in mathematical operations.
+Lets expand on the last code example:
+
+<div style="background-color:lightgrey;">String strNumber="1";
+Integer intNumber=Integer.valueOf(strNumber);
+int intNumberPrim=intNumber.intValue();
+
+String strNumber0="1";
+Integer intNumber0=Integer.valueOf(strNumber0);
+int intNumberPrim0=intNumber0.intValue();
+
+int intNumberPrimSum=intNumberPrim+intNumberPrim0;
+</div>
+
+In this example we converted two different Strings into two different Integers into two different ints.
+The two ints are used to calculate a sum and stored in the int "intNumberPrimSum". We obtained the
+int variables by using the function "intValue". Each wrapper class has a variety of functions for
+converting the value in the wrapper into a primitive data type, they are: booleanValue, byteValue,
+shortValue, intValue, longValue, floatValue, doubleValue, charValue. One for each primitive data type.
+
+In Java, there are some special escape characters that can be used with String objects.
+\t Insert a tab in the text at this point.
+\b Insert a backspace in the text at this point.
+\n Insert a newline in the text at this point.
+\r Insert a carriage return in the text at this point.
+\f Insert a formfeed in the text at this point.
+\' Insert a single quote character in the text at this point.
+\" Insert a double quote character in the text at this point.
+\\ Insert a backslash character in the text at this point.
+
+Example:
+<div style="background-color:lightgrey;">String strWithEscaped="testing1\ntesting2\ntesting3\n";
+System.out.println(strWithEscaped);
+</div>
+
+The output from the console application will be:
+testing1
+testing2
+testing3
+
+Each of the words on its own line. The letters \n aren't displayed because they were used for formating.
+
+Another important note about the String data type is that it can be used in conjunction with the "+" operator.
+Two or more strings can be connected, or concatenated, to form a longer string.
+
+Example:
+<div style="background-color:lightgrey;">String strStart="This is a ";
+String strEnd="complete sentence.";
+String strComplete=strStart+strEnd;
+System.out.println(strComplete);
+</div>
+
+You may be thinking about a possible flaw in the "+" operator because how will the compiler know whether
+it is dealing with Strings or primitive numbers. Generally speaking, I usually make my code very clear
+about the difference between "+" for Strings and "+" for numbers by using parenthesis. I will enclose
+the entire mathematical operation with "(" and ")".
+
+Example:
+<div style="background-color:lightgrey;">int intNumber=1;
+int intNumber0=1;
+System.out.println("The sum of intNumber and intNumber0 is "+(intNumber+intNumber0));
+</div>
+
+All variables included in the parenthesis must be primitive data types. The first "+" is a concatenation
+of the String types and the second "+" is an addition operation between two numbers.
+
+Some commonly used String instance functions are listed:
+<ul>
+<li>int=str.length(): Return the number of characters in the caller</li>
+<li>boolean=str.equals(Object): Return true if the Object is equal to the caller</li>
+<li>boolean=str.startsWith(String): Return true if str starts with String</li>
+<li>boolean=str.endsWith(String): Return true if str ends with String</li>
+<li>String=str.substring(int, int): Create a substring from the first int to the second int</li>
+<li>String=str.substring(int): Create a substring from int to the end of the String</li>
+<li>int=str.indexOf(String, int): Find the first occurrence of String in the caller starting from the index of int</li>
+<li>int=str.lastIndexOf(String, int): Find the last occurrence of String in the caller starting from the index of int and checking backward</li>
+<li>String=str.replace(String, String): Create a String that has replaced the first String parameter with the second String parameter</li>
+<li>char=str.charAt(int): Return the char that is at int index in the caller</li>
+<li>byte[]=str.getBytes(): Return a byte array that represents the caller</li>
+<li>char[]=str.toCharArray(): Return a char array that represents the caller</li>
+<li>String=str.toLowerCase(): Return a String that represents the caller with all lower case letters</li>
+<li>String=str.toUpperCase(): Return a String that represents the caller with all upper case letters</li>
+</ul>
+
+Here is an <a href="StringMatches.java">example</a> with a function for checking if a String matches a String with "*" wildcards.
+
+Here is an <a href="AddLineBreaks.java">example</a> with a function for adding line breaks to a continuous String.
+The implementor of the function decides how long each line should be by supplying an int "intLineLength".
+
+In the next lesson you will learn how to write a console application to perform simple math on parameters.
+</pre>
+</body>
+</html>

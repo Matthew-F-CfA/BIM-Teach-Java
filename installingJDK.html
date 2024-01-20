@@ -1,0 +1,61 @@
+<html>
+<head>
+<title>
+BIM Teach Java - Installing the JDK
+</title>
+</head>
+<body>
+<h2>Installing the JDK</h2>
+<pre>
+In your favorite web browser(Internet Explorer, Google Chrome, etc) navigate to your favorite search
+engine(www.google.com, www.yahoo.com, etc) and enter "Java download jdk". In the search results look
+for the link that points to Oracle's web address. Before installing the jdk get something to write
+on and use it to write down the file path to where you are going to install the jdk in the next step.
+Navigate to that link and select the version of Java that corresponds to your operating system.
+
+If you don't know which operating system you are currently using then in Microsoft Windows you can type
+"System" into the search bar and click the icon that displays system to find the information. If you
+are using an operating system that is older than the current operating systems on devices then in Microsoft
+Windows you can use the start menu and go to the Control Panel item and click on it and look for the System
+inside of Control Panel.
+
+Setting the PATH environment variable on your operating system. Now that you have the jdk installed
+on your computer you need to set the PATH variable, so that your command line console knows where
+to look for the jdk executables. On current Microsoft Windows operating systems you can find the
+environment variable in System then on the left choose the link "Advanced system settings". A dialog
+box will popup with "System Properties". If you aren't already on the Advanced tab then click on it
+now, and at the bottom of the dialog click the button "Environment Variables". In the System variables
+section look for an entry with Variable name of "Path".
+
+If you found the "Path" variable then click the button "Edit". Use your arrow keys to move the text
+cursor all the way to the left. Next, type in the path to the "bin" folder of your jdk that you
+just installed. For my computer I have to type the following into the Path value
+"C:\Program Files\Java\jdk1.8.0_92\bin;". The ";" is necessary to separate other file paths already
+entered into the Path variable.
+
+If you didn't find the "Path" variable then click "New" and type in "Path" for "Variable name" and
+type in the path to the "bin" folder of your jdk that you just installed. No ";" is necessary because
+the "Path" environment variable is new, so there were no existing file paths.
+
+Next, you will need to open a command line console window. In current versions of Microsoft Windows
+you can type "cmd" into the operating system search bar and click the "Command Prompt" option that appears.
+In older versions of Microsoft Windows you can type "cmd" in the Run field in the Start menu.
+
+You should currently have a black box on your screen with your current file path written inside of it.
+To change your file path use the "cd"(stands for change directory) command by typing "cd <folder name>".
+One special utility of the "cd" command is a command for navigating to the directory containing the
+current file path, and it is used by typing "cd..". If your current file path was "c:\Users\matthew" then
+after the "cd.." command the current file path will be "c:\Users". For practice, you can try typing
+the command to navigate back to the original directory. In my case, "cd matthew". Now my current file
+path will be back to where I started with "c:\Users\matthew". Another useful command is "dir" which
+will display a list of directories and files in your current directory. The "cd" command can only
+be used to navigate to directories. Try practicing some navigation to and from directories.
+
+At this point, try typing in "javac". If you get text that says "Usage: javac ..." then you have
+a jdk installed on your computer and your Path environment variable knows where it is located.
+
+Congratulations you have successfully installed the Java Development Kit on your system you are
+now ready to start writing your first applications.
+</pre>
+</body>
+</html>

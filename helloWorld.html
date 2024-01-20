@@ -1,0 +1,101 @@
+<html>
+<head>
+<title>
+BIM Teach Java - Hello World
+</title>
+</head>
+<body>
+<h2>Hello World</h2>
+<pre>
+The application you are about to write is called a console application. It is a console application
+because it doesn't use a Graphical User Interface(or GUI, a GUI is a windows-based interface).
+A console application only deals with text, text input and text output. Console applications usually
+aren't considered user-friendly, but they are often easier to write and useful as utilities.
+
+Download the following file and transfer it to a folder of your choosing(for example, c:\javaTesting)
+where it can be compiled and run.
+<a href="HelloWorld.java">HelloWorld.java</a>
+
+Open up your command line console window and navigate to the folder that you just chose for the
+HelloWorld.java file.
+
+Once in that folder, type in "javac HelloWorld.java". "javac" is a command that is found in the bin
+folder of your jdk software. It stands for java compiler. Whenever you read anything that talks about
+compiling the software, it is talking about the command "javac". The files expected as arguments
+to javac are called source files which are plain text documents that follow the Java language syntax.
+It should compile with no errors.
+
+Next, execute the Java runtime environment with the newly created HelloWorld.class by
+typing in "java HelloWorld".
+
+You should see the text message "Hello World" printed out inside the command line console window.
+
+The HelloWorld.java file contains the following text:
+
+<div style="background-color:lightgrey;">class HelloWorld {
+
+  public static void main(String args[]) {
+    System.out.println("Hello World");
+  }
+}
+</div>
+
+The text following "class " is the name of the class. In this case, "HelloWorld" is the class name.
+The curly brace "{" follows the class name and signifies the start of the contents of the class.
+
+You will see curly braces in every Java source file because all code exists within classes.
+Everything is organized by curly braces, and for each opening "{" there is a closing "}".
+For each "{" and corresponding "}" there is a scope of code. The first "{" is identifying the
+class scope which will contain members of the class. Members consist of fields(or variables)
+and functions(or methods). Fields are like nouns and functions are like verbs. At any time,
+the values of the fields is sometimes referred to as the "state" of the application. Functions
+are sets of sequential instructions that modify the fields in the computer's memory. The process
+of running an application almost always consists of the following cycle: input, operate, output.
+For our simple example HelloWorld we only do output, which is normally out of the ordinary
+because other formats exist that are far more conventional for performing simple output(such
+as html file formats). However, unlike html, Java can be used to perform modifications on
+output that static html can't do.
+
+After the class's curly brace "{", is normally where we would declare and/or initialize
+our fields, but we don't need any for the HelloWorld class example.
+
+The next line of code is a function declaration:
+  public static void main(String args[]) {
+
+"public" identifies the access modifier.
+"static" identifies whether the function is an instance function or a static class function.
+"void" identifies the return type of the function.
+"main" identifies the name of the function.
+"(" identifies that the parameters(or arguments) of the function are being listed.
+"String" identifies the data type of the first parameter.
+"args" identifies the name of the first parameter.
+"[]" identifies that the parameter is an array.
+")" identifies that the last parameter of the function main has been included.
+"{" identifies that the sequential instructions of the function main will be listed next.
+
+Whenever you create a Java application that you want to execute on the command line you must
+include a function named "main" with the same format as the line just described. When executing
+the command "java <Class Name>" the Java runtime environment looks for the function named "main"
+as an entry point into the application.
+
+The next line of code is a function call:
+    System.out.println("Hello World");
+
+"System" identifies the static class containing a field named "out".
+"out" identifies a field in the class "System" which has been declared as static.
+"println" identifies a function declared in the class data type of "out" that has a single parameter of type String.
+""Hello World"" identifies the string, or text, that should be supplied to the "println" function as a parameter.
+
+Don't worry if it seems confusing now. In the following lessons, your questions will be answered.
+
+Basically, the function identified by "System.out.println" will print whatever String is passed in to the console output.
+Try changing the text between the two "s and recompile the HelloWorld.java file then execute it using java HelloWorld.
+Notice how the output changes to correspond with whatever is typed in as the String parameter. Later on, you will
+see how useful System.out.println can be when debugging an application's logic errors because the console output
+can be used to view the state of any field in your program at runtime.
+
+Lastly, you will notice the closing curly braces "}", one for the end of the "main" function and one for the end
+of the class.
+</pre>
+</body>
+</html>
